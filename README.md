@@ -91,7 +91,7 @@ npm run build                                           # deploy dist/ to Vercel
 [research/](research/README.md) contains:
 
 - [accessibility-and-pitfalls.md](research/accessibility-and-pitfalls.md)
-- [idea-shortlist.md](research/idea-shortlist.md)
+- [idea-shortlist.md](research/idea-shortlist.md): final top six (Hands of a Master, Mahabharat Chausar, Artemis Flyby Chair, Repo City, Sadak VR, Giants & Hiders)
 - [sadak-vr-port.md](research/sadak-vr-port.md): a candidate Adapted-division port of [Sadak](https://github.com/mittal-parth/sadak). Its code is not vendored here.
 - [submissions-2026-aggregate.md](research/submissions-2026-aggregate.md): aggregate figures only, no 2026 projects named.
 - [past-winners-2025-analysis.md](research/past-winners-2025-analysis.md)
