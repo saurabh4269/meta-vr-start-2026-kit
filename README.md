@@ -99,6 +99,7 @@ npm run build                                           # deploy dist/ to Vercel
 - [sadak-vr-port.md](research/sadak-vr-port.md): a candidate Adapted-division port of [Sadak](https://github.com/mittal-parth/sadak). Its code is not vendored here.
 - [submissions-2026-aggregate.md](research/submissions-2026-aggregate.md): aggregate figures only, no 2026 projects named.
 - [past-winners-2025-analysis.md](research/past-winners-2025-analysis.md)
+- [past-winners-2025-repos.md](research/past-winners-2025-repos.md): public source repos for the 32 winners of 2025 (with [CSV](research/past-winners-2025-repos.csv))
 
 ## How this was built
 - **Crawl date:** 16 Nov 2026, about 7 PM IST.
