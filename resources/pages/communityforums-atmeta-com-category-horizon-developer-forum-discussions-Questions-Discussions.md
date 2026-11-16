@@ -1,0 +1,6 @@
+# Questions and Discussions | Developer Forum | Community
+
+> Source: https://communityforums.atmeta.com/category/horizon-developer-forum/discussions/Questions_Discussions
+> Fetched: 2026-11-16 (IST) — readable copy for offline reference; content © its owner.
+
+Business Verification "In review" since Oct 20 + Business Info empty and locked + WABA restricted (131031): deadlock Hi everyone, Meta Support told us to post here, so here is our case. Has anyone solved this? - Business portfolio ID: 1032823866439387 (Brazil, MEI company)- Business Verification submitted on Oct 20, 2026. Status: "In review" for almost 4 weeks, no request for more information.- Business Info (legal name, address, phone, website) shows empty, and the Edit button is disabled while the review is pending, so we cannot fill it in.- WhatsApp Business Account 1809492093397790 is restricted (error 131031), and the error points to the empty business info.- Support cases 28618699334497449, 29182226904746855 and 27937125439297263 were all closed with automated replies. The support chat says no human support is available for this case. Questions:1. Is there any way to unlock the Business Info fields while verification is pending, or to have Meta fill them from the submitted registration document?2. Is it safe to cancel and resubmit the verification, or will that put us at the back of the queue?3
