@@ -51,7 +51,7 @@ From [Get Started with Passthrough](https://developers.meta.com/horizon/document
 
 ## 6. Test loop
 - No headset: [Meta XR Simulator](simulators/meta-xr-simulator.md) (Window → Meta → Meta XR Simulator → Activate, then Play).
-- Windows + headset: Quest Link → press Play ([Link](https://developers.meta.com/horizon/documentation/unity/unity-link)).
+- Windows + headset: Quest Link → press Play ([Link](https://developers.meta.com/horizon/documentation/unity/unity-link)). Step-by-step (Horizon Link app, OpenXR runtime, cable test, pitfalls): [windows.md](windows.md).
 - On device: File → **Build Profiles** → platform **Meta Quest** (Unity < 6.1: **Android**) → **Enable/Switch Platform** → Run Device → **Build and Run** ([Build Configuration](https://developers.meta.com/horizon/documentation/unity/unity-build)). Output is an `.apk`.
 
 ## 7. Upload to a release channel named "Competition" + invite URL

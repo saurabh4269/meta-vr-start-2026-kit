@@ -14,4 +14,4 @@ The competition FAQ says a headset isn't required and points to Meta's no-hardwa
 - **Your real room / passthrough** — synthetic rooms are useful for MRUK coverage but aren't a camera feed of a real room.
 - **Store delivery** — release-channel install, invite URL, versionCode checks.
 
-On-device guide: [../on-device-quest.md](../on-device-quest.md).
+On-device guide: [../on-device-quest.md](../on-device-quest.md). Windows (Link, MQDH, XR Simulator install, recording the simulator window): [../windows.md](../windows.md).

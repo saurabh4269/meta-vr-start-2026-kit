@@ -34,7 +34,7 @@ Non-interactive form used for this kit's template: see KIT-NOTES (flags verified
 
 ## 4. Test
 - **Desktop (no headset):** IWER is injected automatically on localhost; toolbar → **Toggle input mode** to switch controllers ↔ hands; Play mode (pointer lock), `Left Shift`+WASD to move — [testing guide](https://developers.meta.com/horizon/documentation/iwsdk/guides/02-testing-experience/). Extension alternative for any WebXR page: [simulators/immersive-web-emulator.md](simulators/immersive-web-emulator.md).
-- **Quest:** same Wi-Fi → open the Vite **Network** URL in Meta Quest Browser → accept the self-signed cert → Enter XR. Or USB + `chrome://inspect/#devices` → Port forwarding → `https://localhost:<port>` (same guide). Remote debugging: [Browser + MQDH](https://developers.meta.com/horizon/documentation/web/browser-mqdh).
+- **Quest:** same Wi-Fi → open the Vite **Network** URL in Meta Quest Browser → accept the self-signed cert → Enter XR. Or USB + `chrome://inspect/#devices` → Port forwarding → `https://localhost:<port>` (same guide), or `adb reverse tcp:<port> tcp:<port>` then open `https://localhost:<port>` in Quest Browser ([Browser remote debugging](https://developers.meta.com/horizon/documentation/web/browser-remote-debugging/)). Remote debugging: [Browser + MQDH](https://developers.meta.com/horizon/documentation/web/browser-mqdh). Windows firewall, `adb reverse`, and `chrome://inspect` detail: [windows.md §9](windows.md#9-iwsdk--webxr-on-windows).
 - **Performance:** [WebXR performance](https://developers.meta.com/horizon/documentation/web/webxr-perf) (frame-rate control, RenderDoc). Rules require ≥60 fps on Quest 3/3S.
 
 ## 5. Deploy

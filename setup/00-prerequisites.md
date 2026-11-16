@@ -46,6 +46,9 @@ Developer Mode is for development only; Meta warns other uses can lead to accoun
 
 ## 5. Windows vs macOS vs Linux
 
+If you are developing on **Windows 10/11 with a Quest 3/3S**, follow the full walkthrough in **[windows.md](windows.md)** (Horizon Link / Air Link, MQDH, adb + the PowerShell helper, Unity Play-in-Editor, XR Simulator, IWSDK on Quest Browser, demo-video capture, and Windows pitfalls). The table below is the short OS matrix; that page is the step-by-step.
+
+
 | Capability | Windows | macOS | Linux | Source |
 |---|---|---|---|---|
 | Unity Build & Run to Quest | ✅ | ✅ | ⚠ not listed in Meta's Unity hardware table | [Hardware Setup](https://developers.meta.com/horizon/documentation/unity/unity-env-device-setup) |
@@ -65,4 +68,4 @@ Developer Mode is for development only; Meta warns other uses can lead to accoun
 | IWSDK / WebXR | [iwsdk-webxr.md](iwsdk-webxr.md) | Hosted HTTPS URL (GitHub Pages, Vercel, …) |
 | Android (Expo / Jetpack Compose / Spatial SDK) | [android.md](android.md) | Invite URL to **Competition** channel |
 
-Then: [on-device-quest.md](on-device-quest.md) (real headset), [simulators/](simulators/README.md) (no headset), [submission-checklist.md](submission-checklist.md).
+Then: [windows.md](windows.md) (Windows + Quest), [on-device-quest.md](on-device-quest.md) (real headset), [simulators/](simulators/README.md) (no headset), [submission-checklist.md](submission-checklist.md).

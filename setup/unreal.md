@@ -32,7 +32,7 @@ From [Create and configure a new project](https://developers.meta.com/horizon/do
 - [Microgestures](https://developers.meta.com/horizon/documentation/unreal/unreal-microgestures). Samples: [Unreal-InteractionSDK-Sample](https://github.com/oculus-samples/Unreal-InteractionSDK-Sample), [Unreal-HandPoseShowcase](https://github.com/oculus-samples/Unreal-HandPoseShowcase); more in [resources/sample-repos.md](../resources/sample-repos.md).
 
 ## 5. Test loop
-- No headset (Windows only): Meta XR Simulator editor integration → [simulators/meta-xr-simulator.md](simulators/meta-xr-simulator.md).
+- No headset (Windows only): Meta XR Simulator editor integration → [simulators/meta-xr-simulator.md](simulators/meta-xr-simulator.md). Windows Link, MQDH, and the Android toolchain notes: [windows.md](windows.md).
 - On device, from [Unreal Android IDE guide](https://developers.meta.com/horizon/documentation/unreal/unreal-ide-guide-android/):
   1. USB-connect, `adb devices`.
   2. **Platforms → Android → Package Project**, flavor **Android (ASTC)**, choose output folder.

@@ -1,13 +1,13 @@
 # Meta VR Start Developer Competition 2026 — dev kit
 
-A private working kit for the [Meta VR Start Developer Competition 2026](https://start-developer-competition-26.devpost.com/):
+A working kit for the [Meta VR Start Developer Competition 2026](https://start-developer-competition-26.devpost.com/):
 
 - every resource linked from the Devpost site, inventoried and mirrored as Markdown;
 - setup guides for each build path (Unity, Unreal, IWSDK/WebXR, Android);
 - simulator guides and an on-device Quest guide;
 - a verified IWSDK starter, helper scripts, and research notes.
 
-> **Private repo: contains copies of third-party docs** (Meta, Devpost, W3C, others) for personal reference. Copyright stays with the original owners and each copy starts with its source URL. Don't make this repo public. SDK binaries and sample code are *linked*, not included.
+> **Contains copies of third-party docs** (Meta, Devpost, W3C, others) for reference. Copyright stays with the original owners and each copy starts with its source URL. SDK binaries and sample code are *linked*, not included.
 
 ## Key dates (IST, UTC+5:30)
 | Event | Official (PT) | IST |
@@ -42,6 +42,7 @@ resources/
   files/                    downloads (none: no PDFs/files were linked)
 setup/
   00-prerequisites.md       accounts, Start membership, dev mode, MQDH, ADB, OS matrix
+  windows.md                Windows-only walkthrough: Link / Air Link, MQDH, adb, Unity, XR Simulator, IWSDK, demo video
   on-device-quest.md        real-headset testing, 60 fps check, hands-only test
   unity.md · unreal.md · iwsdk-webxr.md · android.md
   submission-checklist.md
@@ -49,7 +50,8 @@ setup/
 templates/
   iwsdk-starter/            official IWSDK 1.1.0 MR starter (hands, anchors, planes, grabbing), build-verified
 scripts/
-  quest-adb.sh              install / logcat / wifi adb / perf capture
+  quest-adb.sh              install / logcat / wifi adb / perf capture (bash)
+  quest-adb.ps1             same helpers for Windows PowerShell
   clone-samples.sh          shallow-clone sample repos by group (tools, web, unity, unreal)
   sample-repos.txt          list used by clone-samples.sh
   unity-project-checklist.md · unreal-project-checklist.md
@@ -58,6 +60,8 @@ research/                   accessibility & pitfalls, idea shortlist, Sadak VR p
 ```
 
 ## Quick start by engine
+**On Windows with a Quest?** Start with [setup/windows.md](setup/windows.md) (Link / Air Link, MQDH, adb, per-idea toolchain), then come back to the engine section below.
+
 **IWSDK / WebXR (fastest; works on Linux too):**
 ```bash
 cd templates/iwsdk-starter && npm ci && npm run dev    # Node >=20.19; emulator built in
@@ -85,7 +89,7 @@ npm run build                                           # deploy dist/ to Vercel
 
 **Android (Compose / Expo):** → [setup/android.md](setup/android.md)
 
-**No headset yet?** → [setup/simulators/](setup/simulators/README.md). **Got the Quest?** → [setup/on-device-quest.md](setup/on-device-quest.md).
+**No headset yet?** → [setup/simulators/](setup/simulators/README.md). **Got the Quest?** → [setup/on-device-quest.md](setup/on-device-quest.md). **On Windows?** → [setup/windows.md](setup/windows.md).
 
 ## Research
 [research/](research/README.md) contains:
