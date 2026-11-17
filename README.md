@@ -66,6 +66,10 @@ skills/                     Claude Code skills: quest-hands-first-webxr (core) +
 research/                   accessibility & pitfalls, idea shortlist, Sadak VR port plan,
                             2026 aggregate stats (no projects named), 2025 winners analysis,
                             winners-code-study.md (what we learned from winners' public code; their repos are linked, not vendored)
+  palmistry-rulebook.md      Hast Rekha rulebook (63 features, cited, app-safe flags); JSON in data/palmistry-rules.json
+  palm-autolabel/            automatic palm line/mount labelling plan, prototype results, overlays (README.md first)
+data/                       palmistry-rules.json (rulebook), palm-regions.json (mount polygons + line corridors in joint space)
+scripts/palm/               palm-frame, MediaPipe wrapper, autolabel.py prototype, rulebook builder
 ```
 
 ## Quick start by engine

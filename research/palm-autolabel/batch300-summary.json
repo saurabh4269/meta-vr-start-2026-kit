@@ -1,0 +1,88 @@
+{
+ "dataset": "11k Hands (palmar images only; academic-use dataset; no images or per-image data redistributed here)",
+ "n_images": 300,
+ "n_detected": 300,
+ "n_gate_pass": 148,
+ "seed": 33,
+ "per_line_found": {
+  "life": {
+   "found": 243,
+   "of": 300,
+   "mean_ridge": 0.31,
+   "mean_plr_on_path": 0.8
+  },
+  "heart": {
+   "found": 280,
+   "of": 300,
+   "mean_ridge": 0.39,
+   "mean_plr_on_path": 0.92
+  },
+  "head": {
+   "found": 283,
+   "of": 300,
+   "mean_ridge": 0.37,
+   "mean_plr_on_path": 0.95
+  },
+  "fate": {
+   "found": 45,
+   "of": 300,
+   "mean_ridge": 0.38,
+   "mean_plr_on_path": null
+  },
+  "sun": {
+   "found": 4,
+   "of": 300,
+   "mean_ridge": 0.37,
+   "mean_plr_on_path": null
+  },
+  "mercury_health": {
+   "found": 15,
+   "of": 300,
+   "mean_ridge": 0.4,
+   "mean_plr_on_path": null
+  },
+  "mars_line": {
+   "found": 10,
+   "of": 300,
+   "mean_ridge": 0.42,
+   "mean_plr_on_path": null
+  }
+ },
+ "reject_reasons": {
+  "life:plr-line-not-on-path": 69,
+  "life:not-found": 57,
+  "heart:plr-line-not-on-path": 18,
+  "head:plr-line-not-on-path": 36,
+  "head:not-found": 17,
+  "heart:not-found": 20
+ },
+ "gate_pass_by_skin_tone_label": {
+  "dark": {
+   "passed": 7,
+   "total": 19
+  },
+  "fair": {
+   "passed": 37,
+   "total": 94
+  },
+  "medium": {
+   "passed": 100,
+   "total": 176
+  },
+  "very fair": {
+   "passed": 4,
+   "total": 11
+  }
+ },
+ "heart_end_class": {
+  "between_jupiter_saturn": 132,
+  "under_saturn_or_beyond": 144,
+  "None": 20,
+  "under_jupiter": 4
+ },
+ "head_end_class": {
+  "straight_to_mars": 283,
+  "None": 17
+ },
+ "note": "Agreement with palm-line-reader is NOT ground truth: it is a second automatic estimator. Heart/head end-class distributions are not yet trustworthy (head is always 'straight_to_mars')."
+}

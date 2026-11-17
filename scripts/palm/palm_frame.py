@@ -76,5 +76,5 @@ def rectify(img_bgr, P, cv2):
     src = from_ab(np.array([[0, 0], [1, 0], [0, 1]], float), P).astype(np.float32)  # O, O+Ey, O+Ex
     dst = ab_to_px(np.array([[0, 0], [1, 0], [0, 1]], float)).astype(np.float32)
     M = cv2.getAffineTransform(src, dst)
-    out = cv2.warpAffine(img_bgr, M, (CANVAS["w"], CANVAS["h"]), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    out = cv2.warpAffine(img_bgr, M, (CANVAS["w"], CANVAS["h"]), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
     return out, M
