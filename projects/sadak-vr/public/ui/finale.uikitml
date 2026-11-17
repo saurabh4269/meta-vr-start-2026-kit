@@ -1,0 +1,32 @@
+<!-- Sadak's district finale (components/Game.tsx, tasks.ts finale), word for word. -->
+<style>
+  .card { flex-direction: column; width: 460px; padding: 24px; gap: 12px; }
+  .title { color: #b45309; font-size: 30px; font-weight: 700; letter-spacing: 1px; }
+  .title:dark { color: #fbbf24; }
+  .text { color: #3a3b40; font-size: 19px; line-height: 27px; }
+  .text:dark { color: #dddfe3; }
+  .earned { flex-direction: row; align-items: center; gap: 6px; }
+  .earned-icon { width: 22px; height: 22px; color: #1f9d55; }
+  .earned-text { color: #1c1d20; font-size: 21px; font-weight: 700; }
+  .earned-text:dark { color: #fafaf7; }
+  .buttons { flex-direction: row; gap: 10px; }
+  .button-label { transform-translate-y: 1px; }
+</style>
+<Panel class="card">
+  <div class="title">PURANI SADAK SURVIVED</div>
+  <div class="text">Auto negotiated, chai ordered, flowers at the mandir, bus ticket in your pocket. You did a full Delhi morning without switching to English.</div>
+  <div class="earned">
+    <IndianRupee class="earned-icon"></IndianRupee>
+    <div id="earned" class="earned-text">1,320 earned in Chandni Chowk</div>
+  </div>
+  <div class="buttons">
+    <Button id="btn-explore">
+      <ButtonIcon><Map></Map></ButtonIcon>
+      <ButtonLabel class="button-label">Keep exploring</ButtonLabel>
+    </Button>
+    <Button id="btn-district">
+      <ButtonIcon><LogOut></LogOut></ButtonIcon>
+      <ButtonLabel class="button-label">Choose another district</ButtonLabel>
+    </Button>
+  </div>
+</Panel>

@@ -1,0 +1,18 @@
+<!--
+  Sadak's first-meeting card (components/Game.tsx): "AUTO - Auto Driver",
+  the errand title and its brief, shown for 2.2 s before the dialogue.
+-->
+<style>
+  .card { flex-direction: column; width: 420px; padding: 22px; gap: 8px; }
+  .kicker { color: #b45309; font-size: 15px; font-weight: 700; letter-spacing: 1.4px; }
+  .kicker:dark { color: #fbbf24; }
+  .title { color: #1c1d20; font-size: 30px; font-weight: 700; line-height: 36px; }
+  .title:dark { color: #fafaf7; }
+  .brief { color: #3a3b40; font-size: 19px; line-height: 26px; }
+  .brief:dark { color: #dddfe3; }
+</style>
+<Panel class="card">
+  <div id="kicker" class="kicker">AUTO - AUTO DRIVER</div>
+  <div id="title" class="title">Stop the auto</div>
+  <div id="brief" class="brief">Hail Raju's parked auto, name the railway station, and get the fare under 150 rupees.</div>
+</Panel>

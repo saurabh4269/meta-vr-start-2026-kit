@@ -1,0 +1,14 @@
+<!-- Sadak's ride bar (components/Hud.tsx): "Riding to {destination}" with a Skip button. -->
+<style>
+  .bar { flex-direction: row; width: 420px; padding: 12px; gap: 12px; align-items: center; }
+  .label { color: #1c1d20; font-size: 19px; font-weight: 700; flex-grow: 1; flex-shrink: 1; }
+  .label:dark { color: #fafaf7; }
+  .button-label { transform-translate-y: 1px; }
+</style>
+<Panel class="bar">
+  <div id="ride-label" class="label">Riding to Kachori at the stall</div>
+  <Button id="btn-skip">
+    <ButtonLabel class="button-label">Skip</ButtonLabel>
+    <ButtonIcon><SkipForward></SkipForward></ButtonIcon>
+  </Button>
+</Panel>

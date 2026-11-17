@@ -1,0 +1,21 @@
+<!--
+  Reading card ("washi" design system). Read-only: it sits about 0.9 m away,
+  slightly below eye level, beyond the paper, and is aimed at the writer's head
+  at placement time. Sizes follow Meta's immersive design guidance: body text at
+  roughly 1 degree or more of visual angle, medium/bold weights only (thin
+  strokes shimmer), short line length, ink-on-cream contrast about 15:1.
+  Type: Merriweather Bold (titles), Inter Medium/Semi-Bold/Bold (everything else).
+-->
+<style>
+  .card { flex-direction: column; width: 520px; background-color: #f4ede0; border-radius: 24px; border-width: 2px; border-color: #d8ccb4; padding-left: 30px; padding-right: 30px; padding-top: 22px; padding-bottom: 24px; gap: 8px; }
+  .eyebrow { color: #a8231a; font-family: inter; font-size: 17px; font-weight: 700; letter-spacing: 2.2px; }
+  .title { color: #1d1813; font-family: merriweather; font-size: 38px; font-weight: 700; line-height: 46px; }
+  .body { color: #3d342c; font-family: inter; font-size: 25px; font-weight: 500; line-height: 34px; }
+  .score { color: #7a520a; font-family: inter; font-size: 23px; font-weight: 700; margin-top: 2px; }
+</style>
+<div class="card">
+  <div id="cap-eyebrow" class="eyebrow">HANDS OF A MASTER</div>
+  <div id="cap-title" class="title">Finding your desk</div>
+  <div id="cap-body" class="body">Sit at a table in good light.</div>
+  <div id="cap-score" class="score"> </div>
+</div>

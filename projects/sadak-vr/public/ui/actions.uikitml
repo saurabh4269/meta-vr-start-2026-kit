@@ -1,0 +1,32 @@
+<!--
+  Sadak's dialogue result row (components/Dialogue.tsx): the score for your
+  line, "Continue", "Try again" (only after a 0), and "Hear correct
+  pronunciation" (below 100). Sits under your line on the table.
+-->
+<style>
+  .bar { flex-direction: column; width: 440px; padding: 14px; gap: 10px; align-items: center; }
+  .status { color: #1c1d20; font-size: 20px; font-weight: 700; }
+  .status:dark { color: #fafaf7; }
+  .points { color: #1f9d55; font-size: 30px; font-weight: 700; }
+  .points:dark { color: #6ee7a8; }
+  .buttons { flex-direction: row; gap: 10px; justify-content: center; }
+  .button-label { transform-translate-y: 1px; }
+</style>
+<Panel class="bar">
+  <div id="status" class="status">Hold the mic and speak the line above</div>
+  <div id="points" class="points" style="display: none">+0 pts</div>
+  <div class="buttons">
+    <Button id="btn-hear">
+      <ButtonIcon><Volume2></Volume2></ButtonIcon>
+      <ButtonLabel class="button-label">Hear correct pronunciation</ButtonLabel>
+    </Button>
+    <Button id="btn-retry" style="display: none">
+      <ButtonIcon><RotateCcw></RotateCcw></ButtonIcon>
+      <ButtonLabel class="button-label">Try again</ButtonLabel>
+    </Button>
+    <Button id="btn-continue" style="display: none">
+      <ButtonLabel class="button-label">Continue</ButtonLabel>
+      <ButtonIcon><ArrowRight></ArrowRight></ButtonIcon>
+    </Button>
+  </div>
+</Panel>

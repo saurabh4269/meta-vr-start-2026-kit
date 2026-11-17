@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sadak audio preview</title>
+    <style>
+      body { font: 15px/1.4 system-ui, sans-serif; background: #1d1a17; color: #f3ead8; margin: 0; padding: 16px; }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: #e0a64a; margin: 20px 0 8px; }
+      p { margin: 0 0 8px; color: #c9bda6; }
+      .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      button { font: inherit; background: #3a312a; color: inherit; border: 1px solid #5b4c3f; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+      button:hover { background: #4a3e34; }
+      button.on { background: #8a4b1c; border-color: #c06a2a; }
+      label { display: inline-flex; gap: 6px; align-items: center; }
+      input[type='range'] { width: 140px; }
+      output { min-width: 3em; display: inline-block; }
+      pre { background: #2a241f; padding: 8px; border-radius: 6px; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <h1>Sadak audio preview</h1>
+    <p>SADAK's Delhi music, SFX, raga chime and street ambience (src/sadak-audio). Click Unlock first.</p>
+
+    <div class="row"><button id="unlock">Unlock audio</button><button id="mute">Mute all</button></div>
+
+    <h2>Music</h2>
+    <div class="row">
+      <button id="music-start">Start Delhi</button><button id="music-stop">Stop</button>
+      <button id="music-duck">Duck</button><button id="music-enabled" class="on">Music enabled</button>
+    </div>
+
+    <h2>SFX</h2>
+    <div class="row" id="sfx"></div>
+    <div class="row" style="margin-top: 8px"><button id="sfx-enabled" class="on">SFX enabled</button><button id="chime">Location chime</button></div>
+
+    <h2>Ambience</h2>
+    <div class="row">
+      <button id="amb-start">Start</button><button id="amb-stop">Stop</button><button id="amb-duck">Duck (0.15)</button>
+      <button id="waiting">Waiting in traffic</button><button id="bell">Bell now</button><button id="azaan">Azaan now</button>
+    </div>
+    <div class="row" id="nearby" style="margin-top: 8px"></div>
+
+    <h2>Offline render</h2>
+    <div class="row"><button id="render">Render 20 s of music</button></div>
+    <pre id="out"></pre>
+
+    <script type="module" src="./preview.ts"></script>
+  </body>
+</html>

@@ -1,9 +1,9 @@
 # Skills
 
-The project skills now live in one canonical place: `../../skills/` (next to this kit):
+Claude Code skills for building hands-first Quest experiences with IWSDK/WebXR, distilled from building the projects in `../projects/`:
 
-- `quest-hands-first-webxr`: the core, for every IWSDK/Quest project;
+- `quest-hands-first-webxr`: the core, for every IWSDK/Quest project (process, architecture, hands input, placement, UI text, visual quality, audio, assets and licensing, testing, submission, build path);
 - `quest-mr-tutor`: add-on for learning and tutor experiences;
 - `quest-mr-game`: add-on for games with an opponent or NPC.
 
-`../../skills/sync.sh` copies them into each project's `.claude/skills/`. The older `iwsdk-hands-mr-game` skill that used to be here was merged into them (17 Nov 2026).
+Each project carries its own copy in `.claude/skills/`. In the local workspace (skills folder next to the project folders), `sync.sh` copies the canonical skills into every project. The older `iwsdk-hands-mr-game` skill was merged into these (17 Nov 2026).

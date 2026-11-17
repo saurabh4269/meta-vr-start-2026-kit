@@ -1,0 +1,74 @@
+<!--
+  Sadak's title screen (components/Title.tsx), as the 2D entry panel:
+  the pitch, the city, "Set your starting level" (Easy / Medium / Hard,
+  default Medium), and "Enter Old Delhi". The :dark styles apply because
+  iwsdk.config.json prefers the dark colour scheme.
+-->
+<style>
+  .panel-root { flex-direction: column; width: 460px; }
+  .panel-content { flex-direction: column; gap: 8px; padding: 22px; }
+  .eyebrow { color: #b45309; font-size: 14px; font-weight: 700; letter-spacing: 1.4px; }
+  .eyebrow:dark { color: #fbbf24; }
+  .heading { color: #1c1d20; font-size: 32px; font-weight: 700; line-height: 38px; }
+  .heading:dark { color: #fafaf7; }
+  .body { color: #3a3b40; font-size: 18px; line-height: 25px; }
+  .body:dark { color: #dddfe3; }
+  .badges { flex-direction: row; gap: 8px; flex-wrap: wrap; }
+  .badge { color: #3a3b40; font-size: 13px; font-weight: 600; padding-left: 10px; padding-right: 10px; padding-top: 4px; padding-bottom: 4px; border-radius: 12px; background-color: #f4f4f5; }
+  .badge:dark { color: #e4e4e7; background-color: #2c2d31; }
+  .step { color: #1c1d20; font-size: 17px; font-weight: 700; margin-top: 8px; }
+  .step:dark { color: #fafaf7; }
+  .hint { color: #6a6b70; font-size: 14px; line-height: 19px; }
+  .hint:dark { color: #b9bbc1; }
+  .levels { flex-direction: row; gap: 8px; }
+  .level { flex-direction: column; flex-grow: 1; flex-basis: 0; padding: 10px; gap: 2px; border-radius: 12px; border-width: 2px; border-color: #e4e4e7; }
+  .level:dark { border-color: #3a3b40; }
+  .level-on { border-color: #ff7a1a; background-color: #fff1e0; }
+  .level-on:dark { border-color: #ff7a1a; background-color: #4a2f12; }
+  .level-name { color: #1c1d20; font-size: 17px; font-weight: 700; }
+  .level-name:dark { color: #fafaf7; }
+  .level-desc { color: #6a6b70; font-size: 12px; line-height: 16px; }
+  .level-desc:dark { color: #b9bbc1; }
+  .credits { color: #6a6b70; font-size: 12px; line-height: 17px; margin-top: 6px; }
+  .credits:dark { color: #a9abb2; }
+  .button { justify-content: flex-start; margin-left: 22px; margin-right: 22px; margin-bottom: 22px; }
+  .button-label { transform-translate-y: 1px; }
+</style>
+<Panel class="panel-root">
+  <div class="panel-content">
+    <div class="eyebrow">SADAK  |  MIXED REALITY  |  HANDS FIRST</div>
+    <div class="heading">Sadak Errands</div>
+    <div class="body">Walk the city and finish a real errand out loud: stop an auto, buy at a stall, catch a bus.</div>
+    <div class="badges">
+      <div class="badge">Old Delhi - Chandni Chowk - Hindi</div>
+      <div class="badge">6 errands</div>
+      <div class="badge">Voice by Sarvam AI</div>
+    </div>
+    <div class="step">Set your starting level</div>
+    <div class="hint">How much Hindi do you already have?</div>
+    <div class="levels">
+      <div id="level-easy" class="level">
+        <div class="level-name">Easy</div>
+        <div class="level-desc">I'm new to this language</div>
+      </div>
+      <div id="level-medium" class="level level-on">
+        <div class="level-name">Medium</div>
+        <div class="level-desc">I know some phrases</div>
+      </div>
+      <div id="level-hard" class="level">
+        <div class="level-name">Hard</div>
+        <div class="level-desc">I can hold a basic conversation</div>
+      </div>
+    </div>
+    <div class="hint">Errands get harder as you go: this only sets where the first level starts.</div>
+    <div class="credits">A hands-first VR port of SADAK by ahmedfahim21, Parth Mittal, Apoorva Agrawal and Mardav Gandhi. Voices by Sarvam AI. Map data (c) OpenStreetMap contributors (ODbL). Sit at a table: it becomes the counter.</div>
+  </div>
+  <Button id="xr-button" class="button">
+    <ButtonIcon><RectangleGoggles></RectangleGoggles></ButtonIcon>
+    <ButtonLabel class="button-label">Enter Old Delhi</ButtonLabel>
+  </Button>
+  <Button id="exit-button" class="button" style="display: none">
+    <ButtonIcon><LogIn></LogIn></ButtonIcon>
+    <ButtonLabel class="button-label">Exit to Browser</ButtonLabel>
+  </Button>
+</Panel>

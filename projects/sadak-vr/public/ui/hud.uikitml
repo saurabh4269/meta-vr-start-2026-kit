@@ -1,0 +1,110 @@
+<!--
+  Sadak's HUD "Errands" card (components/Hud.tsx), as a spatial panel on the
+  left of your table: the six Purani Sadak errands, how many are done, and your
+  cash and XP. Ids are addressed from src/game/hud.ts.
+-->
+<style>
+  .hud { flex-direction: column; width: 360px; padding: 18px; gap: 10px; }
+  .top { flex-direction: row; align-items: center; gap: 10px; }
+  .title { color: #1c1d20; font-size: 22px; font-weight: 700; flex-grow: 1; }
+  .title:dark { color: #fafaf7; }
+  .count { color: #6a6b70; font-size: 16px; font-weight: 600; }
+  .count:dark { color: #c9cbd1; }
+  .bar { width: 100%; height: 8px; border-radius: 4px; background-color: #e4e4e7; }
+  .bar:dark { background-color: #3a3b40; }
+  .fill { height: 8px; width: 0%; border-radius: 4px; background-color: #ff7a1a; }
+  .row { flex-direction: row; align-items: center; gap: 12px; padding: 8px; border-radius: 12px; }
+  .row-now { background-color: #fff1e0; }
+  .row-now:dark { background-color: #4a2f12; }
+  .badge { width: 40px; height: 40px; border-radius: 20px; align-items: center; justify-content: center; }
+  .badge-icon { width: 22px; height: 22px; color: #ffffff; }
+  .row-text { flex-direction: column; flex-grow: 1; flex-shrink: 1; gap: 2px; }
+  .row-title { color: #1c1d20; font-size: 17px; font-weight: 700; }
+  .row-title:dark { color: #fafaf7; }
+  .row-sub { color: #6a6b70; font-size: 14px; }
+  .row-sub:dark { color: #b9bbc1; }
+  .tick { width: 26px; height: 26px; color: #1f9d55; }
+  .money { flex-direction: row; gap: 10px; }
+  .chip { flex-direction: row; align-items: center; gap: 4px; padding-left: 12px; padding-right: 12px; padding-top: 6px; padding-bottom: 6px; border-radius: 16px; background-color: #f4f4f5; }
+  .chip:dark { background-color: #2c2d31; }
+  .chip-icon { width: 18px; height: 18px; color: #1f9d55; }
+  .chip-text { color: #1c1d20; font-size: 17px; font-weight: 700; }
+  .chip-text:dark { color: #fafaf7; }
+</style>
+<Panel class="hud">
+  <div class="money">
+    <div class="chip">
+      <IndianRupee class="chip-icon"></IndianRupee>
+      <div id="cash" class="chip-text">0</div>
+    </div>
+    <div class="chip">
+      <Sparkles class="chip-icon"></Sparkles>
+      <div id="xp" class="chip-text">0 XP</div>
+    </div>
+  </div>
+  <div class="top">
+    <div class="title">Errands</div>
+    <div id="count" class="count">0 of 6</div>
+  </div>
+  <div class="bar"><div id="fill" class="fill"></div></div>
+    <div id="row-0" class="row">
+      <div class="badge" style="background-color: #f5c518">
+        <CarTaxiFront class="badge-icon"></CarTaxiFront>
+      </div>
+      <div class="row-text">
+        <div id="title-0" class="row-title">Stop the auto</div>
+        <div id="sub-0" class="row-sub">Auto - Raju Bhai</div>
+      </div>
+      <CircleCheck id="done-0" class="tick" style="display: none"></CircleCheck>
+    </div>
+    <div id="row-1" class="row">
+      <div class="badge" style="background-color: #ff7a1a">
+        <Store class="badge-icon"></Store>
+      </div>
+      <div class="row-text">
+        <div id="title-1" class="row-title">Kachori at the stall</div>
+        <div id="sub-1" class="row-sub">Shop - Vikram</div>
+      </div>
+      <CircleCheck id="done-1" class="tick" style="display: none"></CircleCheck>
+    </div>
+    <div id="row-2" class="row">
+      <div class="badge" style="background-color: #e8364f">
+        <Flower2 class="badge-icon"></Flower2>
+      </div>
+      <div class="row-text">
+        <div id="title-2" class="row-title">Flowers at the mandir</div>
+        <div id="sub-2" class="row-sub">Temple - Sunita</div>
+      </div>
+      <CircleCheck id="done-2" class="tick" style="display: none"></CircleCheck>
+    </div>
+    <div id="row-3" class="row">
+      <div class="badge" style="background-color: #2f8fff">
+        <Bus class="badge-icon"></Bus>
+      </div>
+      <div class="row-text">
+        <div id="title-3" class="row-title">Bus to Kashmere Gate</div>
+        <div id="sub-3" class="row-sub">Bus - Suresh</div>
+      </div>
+      <CircleCheck id="done-3" class="tick" style="display: none"></CircleCheck>
+    </div>
+    <div id="row-4" class="row">
+      <div class="badge" style="background-color: #b05cff">
+        <CookingPot class="badge-icon"></CookingPot>
+      </div>
+      <div class="row-text">
+        <div id="title-4" class="row-title">Paranthe in the gali</div>
+        <div id="sub-4" class="row-sub">Shop - Mohan</div>
+      </div>
+      <CircleCheck id="done-4" class="tick" style="display: none"></CircleCheck>
+    </div>
+    <div id="row-5" class="row">
+      <div class="badge" style="background-color: #19c3b0">
+        <Landmark class="badge-icon"></Landmark>
+      </div>
+      <div class="row-text">
+        <div id="title-5" class="row-title">Up the Jama Masjid minaret</div>
+        <div id="sub-5" class="row-sub">Mosque - Imran</div>
+      </div>
+      <CircleCheck id="done-5" class="tick" style="display: none"></CircleCheck>
+    </div>
+</Panel>

@@ -55,8 +55,15 @@ scripts/
   clone-samples.sh          shallow-clone sample repos by group (tools, web, unity, unreal)
   sample-repos.txt          list used by clone-samples.sh
   unity-project-checklist.md · unreal-project-checklist.md
+projects/                   the six team projects, snapshot of each working tree (17 Nov 2026):
+  hands-of-a-master/        calligraphy + piano with a master's ghost hands (live: hands-of-a-master.vercel.app)
+  chausar/                  Chausar board game vs Shakuni
+  sadak-vr/                 VR port of SADAK (source: github.com/mittal-parth/sadak, not vendored)
+  repo-city/ · giants-and-hiders/ · flyby-chair/   early prototypes
+skills/                     Claude Code skills: quest-hands-first-webxr (core) + quest-mr-tutor, quest-mr-game
 research/                   accessibility & pitfalls, idea shortlist, Sadak VR port plan,
-                            2026 aggregate stats (no projects named), 2025 winners analysis
+                            2026 aggregate stats (no projects named), 2025 winners analysis,
+                            winners-code-study.md (what we learned from winners' public code; their repos are linked, not vendored)
 ```
 
 ## Quick start by engine
