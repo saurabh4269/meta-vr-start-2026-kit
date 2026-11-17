@@ -155,6 +155,8 @@ These are Saurabh's final six candidates, in priority order.
 
 **2026 rival status.** **One loosely similar entry** (3D concept or diagram maps). **None build code cities.**
 
+**More resources.** Similar apps, open-source code-cities, parsers, test-ingestion options and papers are in [ideas-giants-code-resources.md](ideas-giants-code-resources.md#idea-4-code-as-architecture).
+
 ---
 
 ## 5. Sadak VR
@@ -227,6 +229,8 @@ Full plan: **[sadak-vr-port.md](sadak-vr-port.md)**.
 - **The video must show the hide-and-chase loop in its first seconds.**
 
 **2026 rival status.** The 2026 field has **geo-guessing games**, including one polished multiplayer street-imagery guessing game, but **no hide-and-seek or chase game** was found.
+
+**More resources.** Similar apps, the open-source question engine, OSM-to-3D tools, colocation and WebRTC options, and papers are in [ideas-giants-code-resources.md](ideas-giants-code-resources.md#idea-6-giants--hiders).
 
 ---
 
