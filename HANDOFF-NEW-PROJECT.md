@@ -6,6 +6,7 @@ Paste everything below the line into a fresh coding agent (Claude Code or simila
 
 You are starting a new entry for the **Meta VR Start Developer Competition 2026**, built as a hands-only, seated, mixed-reality WebXR app for **Meta Quest 3/3S** with **IWSDK 1.1.0**.
 
+**Build path:** `<WebXR/IWSDK (default) | Unity | Unreal | Godot | native Android>`. Sections 2–4 assume WebXR. For any other engine, also follow section 6.
 **Project idea:** `<one or two sentences: what the player does, and why it's satisfying>`
 **Project folder name:** `<kebab-case-name>`
 
@@ -36,6 +37,13 @@ cd projects/<kebab-case-name>
 - **Build the smallest complete journey first** (enter, place on the real table, do the thing, succeed, finish) and test it end to end in the emulator (`npx iwsdk …` CLI, `skills/quest-hands-first-webxr/scripts/xr_e2e_lib.py`). Then polish, and regression-test after every change.
 - **Hands only.** The whole experience must work without controllers, seated, within about 60 cm, with a satisfying session in 10 minutes or less.
 - **Never show work you haven't looked at.** Take screenshots from the player's real viewpoint and in close-up, and inspect them before you report anything.
+- **Plan a visual pass and budget 3–4 hours for it.** In Hands of a Master this did the most for how the app looked (details in `references/visual-quality.md`; `projects/hands-of-a-master/tools/blender/build_assets.py` is the worked example). In order:
+  1. **Baked ambient occlusion and lighting** in Blender (`bake_ao`: a Cycles bake into a second UV map, exported as glTF occlusion) on every hero model: soft contact shadows and depth where parts meet, at no runtime cost.
+  2. **Merge static parts by material** before export (`merge_by_material`) to cut draw calls.
+  3. **Materials:** clear coat on lacquer or polished surfaces (Principled *Coat Weight* 1, *Coat Roughness* 0.04, exported as `KHR_materials_clearcoat`), sheen on stone and ink, and lighting from each scene's own HDRI (`IBLTexture`).
+  4. **KTX2 / Basis textures** for hero assets (IWSDK bundles three's `KTX2Loader`): sharper at the same memory.
+  5. **Spatial audio:** HRTF panners on sounds that come from an object, with the listener updated from the head pose every frame.
+  6. **On the headset:** check anti-aliasing and the frame rate with `metavr perf capture`. If there's headroom, step up to 90 Hz and check that foveation is applied.
 - **Performance:** Quest 3 needs at least 60 fps (aim for 72 or 90). Keep draw calls low and merge static meshes by material (budgets are in `references/visual-quality.md`).
 - **Assets and licences (rule 10):** use only original, CC0 or public-domain assets, or assets Meta provides. No copyrighted songs, logos, brands or real people. Log every asset's source in `public/**/CREDITS.md`. The free pipeline is in `references/assets-and-licensing.md`; there's no GPU here, so free Hugging Face Spaces and Blender headless are the options.
 - **The user decides** anything that spends money, creates accounts, sets style direction, publishes, or commits. Ask with 2–4 concrete options and a recommendation; decide everything else yourself.
@@ -60,3 +68,19 @@ git push origin HEAD:main
 - **Never force-push** and never rewrite others' commits. If the push is rejected, `git pull --rebase` and push again.
 - **Commit after green test runs,** with small commits and clear messages. The repo is **public**, so don't add third-party code that has no licence; link to it instead.
 - **Lessons that apply beyond your project** go into `skills/` (edit there, never in a project copy), then run `bash skills/sync.sh` and commit both.
+
+## 6. If you build with Unity, Unreal, Godot or native Android instead
+First read `skills/quest-hands-first-webxr/references/build-path.md`. It explains what a native engine adds, what WebXR can match, and when to switch. A native engine is only worth it with weeks rather than days, a Windows or Mac machine, and a headset. Then:
+- **Setup:** `setup/unity.md`, `setup/unreal.md` or `setup/android.md`; `scripts/unity-project-checklist.md` or `scripts/unreal-project-checklist.md`; `setup/simulators/meta-xr-simulator.md` (Windows and macOS only). Use Meta's packages: Meta XR Core and Interaction SDK (v207 or later for gaze interactions), MRUK for the room model, and the Passthrough API. The judging criteria name these explicitly.
+- **Still applies unchanged:** the ten rules and process in `SKILL.md` and `references/process.md` (visual bar first, smallest complete journey first, inspect before showing, bisect before patching), hands-only design, the UI and text numbers in `references/ui-text.md`, assets and licensing, `references/submission.md` (judging map, trailer, Devpost text), and the add-on skills' design guidance. Ignore the IWSDK-specific code, the emulator CLI and `xr_e2e_lib.py`; test in the engine's play mode or simulator, then on the headset.
+- **The visual pass in an engine:**
+  - bake lightmaps and ambient occlusion with the engine's light baker (Unity: Mixed or Baked lights plus a Lightmap bake; Unreal: Lightmass; Godot: LightmapGI), or keep Blender-baked AO;
+  - static batching or merged meshes;
+  - ASTC texture compression;
+  - 4x MSAA;
+  - Application SpaceWarp if the frame rate is tight;
+  - URP with Meta's recommended Quest settings (Unity) or the mobile forward renderer (Unreal). Lumen and Nanite don't run on standalone Quest.
+  - Profile with `metavr perf capture`, OVR Metrics Tool or the engine profiler on the headset, and hold 72–90 fps.
+- **Shipping is different:** judges get an **APK in a release channel named "Competition"** (Developer Center: organisation, then app, then release channel, then invite URL), not a web link. Set this up a day early. `scripts/quest-adb.sh` / `.ps1` installs and logs builds over USB.
+- **Pushing:** commit the engine project to `projects/<kebab-case-name>/` with the engine's standard `.gitignore` (Unity: `Library/`, `Temp/`, `Obj/`, `Build*/`, `Logs/`, `UserSettings/`; Unreal: `Binaries/`, `Intermediate/`, `Saved/`, `DerivedDataCache/`). Use Git LFS for anything over 50 MB. Never commit keystores or signing passwords.
+
