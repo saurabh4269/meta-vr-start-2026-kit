@@ -4,6 +4,7 @@ Added 18 Nov 2026. Both ideas came from Saurabh. Same rules as the [shortlist](i
 
 - **No 2026 project is named or linked.** Rival status below comes from keyword counts over the public gallery data, in aggregate only. See [submissions-2026-aggregate.md](submissions-2026-aggregate.md).
 - ⚠ marks my design suggestion, assumption or risk call. It is not a sourced fact.
+- **More resources:** existing apps, open-source repos, datasets and learning links for both ideas are in [ideas-7-8-resources.md](ideas-7-8-resources.md).
 
 | | **7. Twin Hands** | **8. Hast Rekha** |
 |---|---|---|
