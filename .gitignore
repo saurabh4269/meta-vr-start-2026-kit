@@ -14,3 +14,4 @@ Thumbs.db
 
 # Agent worktrees inside project copies
 **/.claude/worktrees/
+__pycache__/
