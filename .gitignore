@@ -5,3 +5,9 @@ dist/
 .DS_Store
 samples/
 *.apk
+*.tsbuildinfo
+*.log
+.iwsdk/
+.mcp.json
+Thumbs.db
+.vercel/
