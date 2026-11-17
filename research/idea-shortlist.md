@@ -230,6 +230,23 @@ Full plan: **[sadak-vr-port.md](sadak-vr-port.md)**.
 
 ---
 
+## 7–8. Added 18 Nov: Twin Hands and Hast Rekha
+Two later ideas from Saurabh. Full concept docs, evidence review and sources are in [ideas-7-8.md](ideas-7-8.md).
+
+**7. Twin Hands** (bimanual coordination "brain gym")
+- **Concept.** A short hands-only practice game. A ghost-hand coach shows a two-hand pattern (mirror or parallel wrist circles, opposite finger sequences, in/anti-phase open-close), and the headset scores sync, accuracy and tempo live.
+- **Evidence verdict.** Legitimate coordination/timing practice, but there is no good evidence it repairs attention. Brain Gym's claims are unsupported, so there are **no medical claims** in the pitch.
+- **Engine.** IWSDK. **MVP.** Three exercises, ghost demo, scored round, streak. **Biggest risk.** Health overclaiming, then occlusion when the hands cross.
+- **2026 rival status.** No bilateral-coordination entries found. Wellness is crowded.
+
+**8. Hast Rekha** (Indian palmistry in MR)
+- **Concept.** A pandit reads your palm in passthrough: glowing lines on your real hand, the seven mounts lighting up, a reading, and a shareable card. Framed as culture and entertainment, not prediction.
+- **Feasibility verdict.** The hands-only version (hand shape, mounts, tracing your own lines) is solid. Scanning real creases through the Passthrough Camera API is possible in Unity but unproven at 1280×960. WebXR cannot do it today.
+- **Engine.** Unity. **MVP.** Tier 0 hands only, Tier 1 Trace mode, Tier 2 Scan mode. **Biggest risk.** Crease detection quality; Trace mode is the fallback.
+- **2026 rival status.** No palmistry entries found.
+
+---
+
 ## Other ideas considered
 Briefly kept on the bench. Details for the productivity ones are in [past-winners-2025-analysis.md §6](past-winners-2025-analysis.md).
 
