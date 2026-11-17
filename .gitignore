@@ -11,3 +11,6 @@ samples/
 .mcp.json
 Thumbs.db
 .vercel/
+
+# Agent worktrees inside project copies
+**/.claude/worktrees/
