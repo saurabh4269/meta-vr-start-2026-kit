@@ -31,6 +31,8 @@ Sources: [dates](https://start-developer-competition-26.devpost.com/details/date
 
 Full detail: [`resources/devpost/rules.md`](resources/devpost/rules.md) · checklist: [`setup/submission-checklist.md`](setup/submission-checklist.md).
 
+**Starting a new project?** Paste [`HANDOFF-NEW-PROJECT.md`](HANDOFF-NEW-PROJECT.md) into a fresh coding agent.
+
 ## Folder map
 ```
 resources/
