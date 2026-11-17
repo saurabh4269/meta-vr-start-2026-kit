@@ -32,6 +32,7 @@
 | Preset | `browser run tools/goto.mjs` | needs `dev restart --allow-browser-automation` (architecture.md) |
 
 ## Rules that saved hours
+- **Unattended runs: headless.** A headed managed browser stops drawing when the screen locks or the window is hidden. The app logs one frame and freezes (e.g. stuck at "finding your desk") with **no errors**. Use `npx iwsdk dev restart --headless --open --allow-browser-automation` for long or overnight test runs; switch back to headed (and say so) when the user wants to watch.
 - **Never edit `src/` while a run is going** (comments included). Docs, skills and `public/` assets outside the import graph are safe. If you slipped, restart the run.
 - Run long suites in the background (`npm run test:xr`) and write docs meanwhile; wait for the completion notice.
 - Quick run (one item + the changed feature) after each change; the full suite before each commit.

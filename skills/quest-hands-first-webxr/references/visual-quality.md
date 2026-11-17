@@ -86,3 +86,10 @@ AO only affects indirect light (IBL, ambient), so it reads strongest under image
 - KTX2/Basis is Meta's recommended texture format (IWSDK bundles `KTX2Loader`); worth it when texture memory or upload hitches show up.
   - Check before converting. If the textures are already small WebP (≤2k, a few MB of VRAM in total), KTX2 changes nothing visible and ETC1S can blotch faces.
   - IWSDK fetches the Basis transcoder from unpkg at runtime, so self-host it (`ktx2TranscoderPath`) for an offline-safe build.
+
+## Culling a vendored world (without editing it)
+A desktop-built city draws everything, every frame. Cull from outside so the original's code stays untouched:
+- **Plain meshes:** toggle `mesh.layers` channel 0 by distance from the user, never `visible`, so the original's own visibility logic keeps working. Work in the world group's frame: `inverse(world.matrixWorld) * mesh.matrixWorld`. Update a slice of meshes per frame (all within ~0.25 s), and all of them after a jump (a ride or teleport).
+- **InstancedMesh (crowds, lamps, clutter):** an `InstancedMesh` has no per-instance culling. Leave the source where the original writes it, take it off layer 0, and add a sibling proxy that shares its geometry and material. Copy only the instances in range into the proxy (with their instance colours), and only when the source's `instanceMatrix.version` changes or the user moves. Skip zero-scaled instances, which mean hidden parts. Never compact the source in place: the original may pose some instances only once.
+- **Rescan every second:** worlds that stream in detail add meshes later.
+- **Radii that worked in Old Delhi lanes:** crowd 45 m, traffic 70 m, other props 60 m, buildings 170 m, ink hulls 45 m. Landmarks, roads and ground are never culled. Result: 100–150 draw calls and 0.2–0.45M triangles per view on the desktop emulator, and about 340 calls and 0.57M triangles for both eyes in XR.
