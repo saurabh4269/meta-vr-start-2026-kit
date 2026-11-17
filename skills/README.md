@@ -2,7 +2,7 @@
 
 Claude Code skills for building hands-first Quest experiences with IWSDK/WebXR, distilled from building the projects in `../projects/`:
 
-- `quest-hands-first-webxr`: the core, for every IWSDK/Quest project (process, architecture, hands input, placement, UI text, visual quality, audio, assets and licensing, testing, submission, build path);
+- `quest-hands-first-webxr`: the core, for every IWSDK/Quest project (process, architecture, hands input, placement, UI text, visual quality, audio, assets and licensing, testing, submission, build path, and Meta's hands-first sources with links);
 - `quest-mr-tutor`: add-on for learning and tutor experiences;
 - `quest-mr-game`: add-on for games with an opponent or NPC.
 

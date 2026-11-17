@@ -51,6 +51,8 @@
 ## What only a headset can prove (keep this list in `docs/TESTING.md`, tick it on the device)
 72 fps (60 floor) during the heaviest effect; text and models render under multiview; contact and pinch thresholds with real hands; tracking at gesture extremes (under the table, edge of view); two different rooms; depth occlusion; text legibility at distance; hand-tracking permission prompt; system-menu pause; TTS voices; the file picker in Quest Browser; microgestures; the production URL logged out.
 
+**Playtest without coaching** (Meta's "Hands Onboarding 101", and all three hands-first stories): hand the headset to someone new and say nothing. Note where they hesitate, try another input, miss a confirmation or fail to recover; fix that step and try again with a different person. Include different hand sizes, left-handers and a controller user. Developers are poor judges: they already know how it's supposed to work.
+
 ## Meta VR CLI on the device (works on Linux)
 The `metavr` binary installs to `~/.metavr/npm/binaries/@meta-quest__metavr-linux-x64/<version>/metavr` and is not on PATH.
 ```
@@ -92,3 +94,7 @@ The rules accept emulator footage ("as viewed on a Meta Quest device or via XR S
   - Route Chromium to a null sink: `pactl load-module module-null-sink sink_name=rec`, then `pactl move-sink-input <id> rec`. New Chromium streams follow (stream-restore).
   - Record with `ffmpeg -f pulse -i rec.monitor`.
   - **Move the streams back and unload the sink afterwards,** or Chromium stays silent for the user.
+
+## Lessons from Mario 64 MR (Unity, studied Nov 2026; ideas only, see reference-winners/mario64mr-REPORT.md)
+- *Headless tests of the game core* drive the real build through its menus to a known state, inject room and hand geometry, and assert outcomes. Each player-reported bug becomes one named case.
+- *Platform arithmetic:* undefined float-to-integer casts behave differently on the headset's arm64 CPU; test pure maths on arm64 or clamp before casting.
