@@ -7,6 +7,7 @@
 | [idea-shortlist.md](idea-shortlist.md) | Final top six ideas in full detail + other ideas considered (generic rival status, no 2026 projects named) |
 | [ideas-7-8.md](ideas-7-8.md) | Ideas 7 (Twin Hands, bimanual coordination) and 8 (Hast Rekha, Indian palmistry in MR): evidence/feasibility review, designs, MVPs, sources |
 | [ideas-7-8-resources.md](ideas-7-8-resources.md) | Similar apps, open-source repos, datasets and learning links for ideas 7 and 8 (verified links, licences, stars) |
+| [hast-rekha-magic-design.md](hast-rekha-magic-design.md) | Hast Rekha magic pack: glowing lines, stencil/passthrough portals, per-line world art, divine voice stack, build recipe (verified links) + [audio samples](hast-rekha-audio/README.md) |
 | [ideas-giants-code-resources.md](ideas-giants-code-resources.md) | Similar apps, open-source repos, papers and Meta docs for Giants & Hiders (idea 6) and Code as Architecture (idea 4): top-picks table, verified links, licences, stars |
 | [sadak-vr-port.md](sadak-vr-port.md) | Port plan: Sadak (voice-first Indian-language game) → hands-first WebXR, with permissions/credits checklist |
 | [submissions-2026-aggregate.md](submissions-2026-aggregate.md) | Aggregate-only stats on the 2026 public gallery: theme counts, crowded vs open |
