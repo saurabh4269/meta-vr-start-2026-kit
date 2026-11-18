@@ -1,4 +1,4 @@
-# Hast Rekha (palmistry) - project folder
+# Palmverse (working name Hast Rekha, palmistry) - project folder
 
 Index for the Hast Rekha idea. Existing docs stay where they are; this page links them so a coding agent can start here.
 
@@ -11,6 +11,7 @@ Index for the Hast Rekha idea. Existing docs stay where they are; this page link
 | Rulebook (lines, mounts, marks; app-safe wording) | [`../palmistry-rulebook.md`](../palmistry-rulebook.md), [`../../data/palmistry-rules.json`](../../data/palmistry-rules.json) |
 | Palm-frame regions and line centrelines `(a,b)` | [`../../data/palm-regions.json`](../../data/palm-regions.json) |
 | Automatic palm-line labelling research | [`../palm-autolabel/`](../palm-autolabel) |
+| **Trailer script (60 s + 30 s cuts, shot list, music direction)** | [`../../video/palmverse-trailer.md`](../../video/palmverse-trailer.md) (also section 7 of [`../../video/trailer-scripts.md`](../../video/trailer-scripts.md)) |
 | **Visual reference: 2025 winner Magic Wonders (23 stills, internal use only)** | [`reference/magic-wonders/README.md`](reference/magic-wonders/README.md) |
 
 Style cue from the references (details in the reference README): dark UI, one saturated glow colour per object, a **white-hot core with a coloured halo and a fading tail** for strokes, bright single glyphs in dark circular medallions, soft nebula backdrops, floating chips, the "real room reacts" idea. For Hast Rekha swap purple for gold/ember/saffron and per-mount Navagraha colours.
