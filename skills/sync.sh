@@ -9,6 +9,8 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WS="$(dirname "$HERE")"
 SKILLS=(quest-hands-first-webxr quest-mr-tutor quest-mr-game)
 PROJECTS=(hands-of-a-master chausar repo-city giants-and-hiders flyby-chair sadak-vr)
+# Genre add-ons a project does not use (its repo stays about that project only).
+declare -A SKIP=([chausar]="quest-mr-tutor")
 
 command -v rsync >/dev/null || { echo "rsync not found" >&2; exit 1; }
 
@@ -23,6 +25,9 @@ for p in "${PROJECTS[@]}"; do
   dest="$dir/.claude/skills"
   mkdir -p "$dest"
   for s in "${SKILLS[@]}"; do
+    case " ${SKIP[$p]:-} " in *" $s "*)
+      rm -rf "${dest:?}/$s"; echo "skip  $p/.claude/skills/$s (not used by $p)"; continue ;;
+    esac
     n=$(rsync -a --delete --exclude '__pycache__' --itemize-changes "$HERE/$s/" "$dest/$s/" | wc -l)
     if diff -rq --exclude '__pycache__' "$HERE/$s" "$dest/$s" >/dev/null; then
       ok=$((ok + 1))
