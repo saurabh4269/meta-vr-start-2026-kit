@@ -58,7 +58,7 @@ scripts/
   sample-repos.txt          list used by clone-samples.sh
   unity-project-checklist.md · unreal-project-checklist.md
 projects/                   the six team projects, snapshot of each working tree (17 Nov 2026):
-  ink-and-ivory/            Ink and Ivory: calligraphy + piano with a master's ghost hand (live: ink-and-ivory.vercel.app; repo: github.com/shiwani42/ink-and-ivory)
+  ink-and-ivory/            Ink and Ivory: calligraphy + piano with a master's ghost hand (live: hands-of-a-master.vercel.app; repo: github.com/shiwani42/ink-and-ivory)
   chausar/                  Chausar board game vs Shakuni
   sadak-vr/                 VR port of SADAK (source: github.com/mittal-parth/sadak, not vendored)
   repo-city/ · giants-and-hiders/ · flyby-chair/   early prototypes
