@@ -12,7 +12,7 @@ Mixed reality can put the teacher's hand right next to yours, on your own desk, 
 
 ## What it does
 
-You put on a Quest, sit at a table and press "Begin at my desk". A writing set lands on your real table, in your own room. If you like, the Scene button fades your room into a place where the craft is practised (a temple veranda in Kyoto, a Chinese garden, or a medieval cloister for English lettering), or into a photo of your own.
+You put on a Quest, sit at a table and press "Begin at my desk". A writing set lands on your real table, in your own room. If you like, the Scene button fades your room into a place where the craft is practised (a Japanese garden veranda, a Chinese garden, or a medieval cloister for English lettering), or into a photo of your own. In beta, you can also describe a place in words and an AI model paints it as a 360 background.
 
 **Calligraphy**
 - A translucent master's hand writes the character first, holding a brush (or a broad-edge pen for English).
@@ -54,7 +54,7 @@ It runs in the browser (WebXR), so a judge or a student opens a link and starts.
 - **Placement:** the app finds a table among the detected planes, ignores couches, beds and tilted surfaces, and anchors the set so it can return to the same spot next session.
 - **Lesson data:** stroke order and shapes come from KanjiVG (Chinese and Japanese, including hiragana). The English italic letters are our own drawings, written in the order a scribe would write them.
 - **Models:** every object, from the brush to the grand piano, is built by one Blender Python script, with baked shadows where parts meet.
-- **Assets:** 360-degree places from Poly Haven and Wikimedia Commons (CC0), sampled grand piano notes, and public-domain melodies with our own arrangements.
+- **Assets:** 360-degree places from Poly Haven (CC0) and a garden 360 shot by our team, sampled grand piano notes, and public-domain melodies with our own arrangements.
 - **Sound:** spatial, so each note comes from its key and the brush sounds where it touches.
 - **Testing:** we didn't have a headset for most of the build. We wrote automated tests that drive the IWSDK emulator's hands through the experience:
   - every lesson, plus wrong strokes that must get the right hint;
@@ -100,8 +100,9 @@ What we want to do next:
 
 - **Stroke order and shapes:** [KanjiVG](https://kanjivg.tagaini.net), CC BY-SA 3.0, (c) Ulrich Apel and contributors (Japanese and Chinese characters and hiragana). The English italic letters are our own.
 - **Piano samples:** Salamander Grand Piano by Alexander Holm, CC-BY 3.0.
-- **360-degree places:** Kennin-ji 360 photograph by AsPJT (CC0, Wikimedia Commons); Chinese Garden, Ballroom and Historic Cloister Passage (by Elvis Posa) HDRIs from Poly Haven (CC0). Studio lighting: Brown Photostudio 02 by Sergej Majboroda, Poly Haven (CC0).
+- **360-degree places:** Japanese garden veranda by Yosun Chang (Ink and Ivory team); Chinese Garden, Ballroom and Historic Cloister Passage (by Elvis Posa) HDRIs from Poly Haven (CC0). Studio lighting: Brown Photostudio 02 by Sergej Majboroda, Poly Haven (CC0).
 - **Music:** "Yoiyami Core Theme", "Oriental Somber", and "Asianoriental1" and "Asianoriental2" by Tozan, CC0 via OpenGameArt.
+- **Text to 360 (beta):** [DiT360](https://huggingface.co/spaces/Insta360-Research/DiT360) by Insta360 Research (MIT), called as a public Hugging Face Space.
 - **Textures:** Poly Haven and ambientCG (CC0).
 - **Hands:** WebXR Input Profiles generic hand (MIT); base hand pose from IWER (MIT, Meta Platforms).
 - **Melodies:** traditional or by composers who died long ago (public domain); Happy Birthday's melody is public domain. Our own note sequences and exercises.

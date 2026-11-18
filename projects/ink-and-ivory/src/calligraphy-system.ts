@@ -56,6 +56,7 @@ import { GOLD, GUIDE_COLOR, INK_COLOR, InkRibbon, VERMILION } from './ink/ink-ri
 
 import { Environment, SCENES, type SceneDef } from './env/environment.js';
 import { loadOwnPano, makeOwnPano } from './env/own-pano.js';
+import { generatePano } from './env/text-pano.js';
 import { DeskMemory } from './mr/desk-memory.js';
 import { gatherPlanes } from './mr/plane-source.js';
 import { describeReport, emptyReport, findTableSpot, type PlaneInput, resetReport } from './mr/room-placement.js';
@@ -259,6 +260,8 @@ export class CalligraphySystem extends createSystem({
   private toolTip = new Vector3();
   private toolWeb = new Vector3();
   private toolTmp = new Vector3();
+  private lastEye = new Vector3(0, 0.44, 0.4);
+  private fitClock = 0;
   /**
    * Real pen mode (beta): you hold a real pen, brush or chopstick and its tip
    * touches the desk. Touching the seal with the tip teaches where the tip
@@ -272,6 +275,8 @@ export class CalligraphySystem extends createSystem({
   private penCand = new Matrix4();
   private penCandidate?: { m: Matrix4; height: number; hand?: XRHandedness };
   private midiInput?: HTMLInputElement;
+  private genOverlay?: HTMLDivElement;
+  private generating = false;
   private status?: UIKitMLAsset; // body-locked card shown while finding the desk
   private statusEntity?: Entity;
   private textScale = 1;
@@ -447,6 +452,14 @@ export class CalligraphySystem extends createSystem({
     if (import.meta.env.DEV) {
       // Dev only: tools feed a test photo to the own-background converter.
       (window as unknown as { __hoamAddPano?: (f: File) => Promise<void> }).__hoamAddPano = (f) => this.addPano(f);
+      (window as unknown as { __hoamPaint?: (t: string) => void }).__hoamPaint = (t) => {
+        this.describePano();
+        (this.genOverlay!.querySelector('#hoam-gen-text') as HTMLTextAreaElement).value = t;
+        this.genOverlay!.querySelector('form')!.requestSubmit();
+      };
+      void import('./env/logo-cap.js').then(({ drawLogo }) => {
+        (window as unknown as { __hoamLogo?: () => string }).__hoamLogo = () => drawLogo(1024).toDataURL('image/png');
+      });
     }
     if (this.preset?.state === 'fresh') {
       clearProgress();
@@ -632,6 +645,7 @@ export class CalligraphySystem extends createSystem({
     on(this.menu, 'lang-chinese', () => this.setLanguage('chinese'));
     on(this.menu, 'btn-scene', () => this.cycleScene());
     on(this.welcome, 'pano-button', () => this.pickPano());
+    on(this.welcome, 'gen-button', () => this.describePano());
     on(this.menu, 'craft-piano', () => this.setCraft('piano'));
     on(this.menu, 'btn-record', () => this.startListening());
     on(this.welcome, 'midi-button', () => this.pickMidi());
@@ -737,10 +751,87 @@ export class CalligraphySystem extends createSystem({
     this.panoInput.click();
   }
 
+  /**
+   * Start page (beta): describe a place in words and DiT360 paints a 360
+   * panorama of it, which becomes your own background. A plain DOM form over
+   * the 2D page: typing works with the Quest Browser's keyboard here, before
+   * the headset session starts.
+   */
+  private describePano(): void {
+    if (this.generating) return;
+    if (!this.genOverlay) {
+      const wrap = document.createElement('div');
+      wrap.style.cssText =
+        'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(21,17,13,0.55);z-index:20;font-family:Inter,system-ui,sans-serif';
+      wrap.innerHTML = `
+        <form style="width:min(520px,calc(100vw - 32px));box-sizing:border-box;background:#f4ede0;border:2px solid #d8ccb4;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px;color:#1d1813">
+          <div style="color:#a8231a;font-size:13px;font-weight:700;letter-spacing:2.4px">TEXT TO 360 (BETA)</div>
+          <label for="hoam-gen-text" style="font-size:18px;font-weight:600;line-height:1.4">Describe the place you want around you while you practise.</label>
+          <textarea id="hoam-gen-text" rows="3" maxlength="300" style="font:inherit;font-size:17px;padding:10px 12px;border-radius:12px;border:2px solid #d8ccb4;background:#fffaf1;color:#1d1813;resize:vertical">A quiet Japanese tea room with tatami mats and paper screens, soft morning light</textarea>
+          <div style="display:flex;gap:10px">
+            <button type="submit" id="hoam-gen-go" style="flex:1;height:52px;border:0;border-radius:14px;background:#1d1813;color:#f4ede0;font:inherit;font-size:17px;font-weight:700;cursor:pointer">Paint it</button>
+            <button type="button" id="hoam-gen-close" style="height:52px;padding:0 18px;border:2px solid #d8ccb4;border-radius:14px;background:#ebe1cf;color:#1d1813;font:inherit;font-size:17px;font-weight:600;cursor:pointer">Close</button>
+          </div>
+          <div id="hoam-gen-status" role="status" style="font-size:15px;line-height:1.45;color:#3d342c;min-height:22px"></div>
+          <div style="font-size:13px;line-height:1.4;color:#6f6255">Painted by DiT360 (Insta360 Research), a free public AI model on Hugging Face. It takes about a minute and only a few paintings a day per connection. Your words are sent to that service.</div>
+        </form>`;
+      document.body.appendChild(wrap);
+      this.genOverlay = wrap;
+      this.cleanupFuncs.push(() => wrap.remove());
+      const form = wrap.querySelector('form')!;
+      const close = () => {
+        if (!this.generating) wrap.style.display = 'none';
+      };
+      wrap.querySelector('#hoam-gen-close')!.addEventListener('click', close);
+      wrap.addEventListener('click', (e) => {
+        if (e.target === wrap) close();
+      });
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = (wrap.querySelector('#hoam-gen-text') as HTMLTextAreaElement).value.trim();
+        if (text) void this.paintPano(text);
+      });
+    }
+    this.genOverlay.style.display = 'flex';
+  }
+
+  private async paintPano(prompt: string): Promise<void> {
+    const wrap = this.genOverlay!;
+    const status = wrap.querySelector('#hoam-gen-status') as HTMLDivElement;
+    const go = wrap.querySelector('#hoam-gen-go') as HTMLButtonElement;
+    const say = (s: string) => {
+      status.textContent = s;
+      this.text(this.welcome, 'midi-note', s);
+    };
+    this.generating = true;
+    go.disabled = true;
+    go.style.opacity = '0.5';
+    const t0 = performance.now();
+    say('Sending your description...');
+    try {
+      const file = await generatePano(prompt, say);
+      this.log(`text to 360 painted in ${Math.round((performance.now() - t0) / 1000)} s, ${(file.size / 1e6).toFixed(1)} MB`);
+      await this.addPano(file);
+      say('Done: your painted place is now your background. Press "Begin at my desk"; the menu\'s Scene button switches it on or off.');
+      this.generating = false;
+      setTimeout(() => {
+        if (!this.generating) wrap.style.display = 'none';
+      }, 2500);
+    } catch (error) {
+      const why = error instanceof Error ? error.message : String(error);
+      say(`Sorry, it could not be painted: ${why}`);
+      this.log(`text to 360 failed: ${why}`);
+    } finally {
+      this.generating = false;
+      go.disabled = false;
+      go.style.opacity = '1';
+    }
+  }
+
   private async addPano(file: File): Promise<void> {
     this.text(this.welcome, 'midi-note', 'Making your background...');
     try {
-      const { blob, converted } = await makeOwnPano(file);
+      const { blob, converted, ms } = await makeOwnPano(file);
       if (this.ownPanoUrl) URL.revokeObjectURL(this.ownPanoUrl);
       this.ownPanoUrl = URL.createObjectURL(blob);
       this.ownPanoVersion++;
@@ -756,7 +847,7 @@ export class CalligraphySystem extends createSystem({
           ? 'Your photo is now a 360 background: it hangs in front of you, and its colours wrap all the way round. In the headset, the menu\'s Scene button switches it on or off.'
           : 'Your 360 panorama is your background. In the headset, the menu\'s Scene button switches it on or off.',
       );
-      this.log(`own background ${converted ? 'converted from a photo' : 'panorama'}`);
+      this.log(`own background ${converted ? 'converted from a photo' : 'panorama'} in ${ms} ms, ${(blob.size / 1e6).toFixed(1)} MB`);
       if (this.mode !== 'demo2d') this.applyScene();
     } catch (error) {
       this.text(this.welcome, 'midi-note', 'That image could not be used. Try a JPG or PNG photo.');
@@ -1048,9 +1139,51 @@ export class CalligraphySystem extends createSystem({
       }
       this.aimPanelAt(this.caption, eye);
     }
+    this.lastEye.copy(eye);
+    this.fitPanelsAboveDesk();
   }
 
-  /** Turn a +Z-facing panel so it faces a point (both in its parent's space). */
+  /**
+   * No panel may cut into the desk (or the piano). Measure each panel's real
+   * bounds in desk space, lift it so its lowest edge clears the surface, and
+   * if that would raise its top far above the eyes, shrink it a little
+   * instead (down to 80%). Re-run while panels lay themselves out.
+   */
+  private fitPanelsAboveDesk(): void {
+    const piano = this.craft === 'piano';
+    const clear = piano ? 0.07 : 0.03; // above the keys and case, or the paper and tools
+    for (const [panel, cardId] of [[this.menu, 'menu-card'], [this.caption, 'caption-card']] as const) {
+      if (!panel?.visible) continue;
+      // A UIKit element's world matrix maps the unit square onto its
+      // rectangle: its corners give the card's true extent (Box3 can't
+      // measure UIKit's instanced text).
+      const card = panel.getElementById(cardId) as unknown as Object3D | undefined;
+      if (!card) continue;
+      for (let pass = 0; pass < 2; pass++) {
+        this.desk.root.updateWorldMatrix(true, true);
+        panel.updateWorldMatrix(true, true);
+        const e = card.matrixWorld.elements;
+        const reach = Math.abs(e[1]) / 2 + Math.abs(e[5]) / 2; // half extent along world up
+        if (reach < 1e-4) break; // not laid out yet
+        const deskY = this.desk.root.matrixWorld.elements[13];
+        const bottom = e[13] - reach - deskY;
+        const top = e[13] + reach - deskY;
+        if (bottom >= clear - 0.002) break;
+        const lift = clear - bottom;
+        const maxTop = this.lastEye.y + 0.12;
+        if (top + lift > maxTop && pass === 0) {
+          // Too tall to sit above the desk at this height: shrink, then lift.
+          const height = Math.max(0.05, top - bottom);
+          const k = Math.max(0.8, (maxTop - clear) / height);
+          panel.scale.multiplyScalar(k);
+          continue;
+        }
+        panel.position.y += lift;
+        if (import.meta.env.DEV) this.log(`panel ${cardId} lifted ${(lift * 100).toFixed(1)} cm (bottom was ${(bottom * 100).toFixed(1)} cm)`);
+      }
+    }
+  }
+
   private aimPanelAt(panel: { position: Vector3; rotation: { order: string; x: number; y: number; z: number } }, target: Vector3): void {
     const dx = target.x - panel.position.x;
     const dy = target.y - panel.position.y;
@@ -3120,6 +3253,11 @@ export class CalligraphySystem extends createSystem({
       this.sfx.setScratch(0);
       this.cues.hideAll();
       return;
+    }
+    this.fitClock += dt;
+    if (this.fitClock > 0.5) {
+      this.fitClock = 0;
+      this.fitPanelsAboveDesk();
     }
     this.readTip(dt);
     this.updatePoke();
