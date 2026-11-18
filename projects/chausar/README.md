@@ -66,7 +66,7 @@ npm run typecheck && npm run build
 
 ```bash
 npm test               # rules + dice physics, headless (no browser)
-npx @iwsdk/cli dev up --ai-mode agent && npm run test:xr   # 19 XR checks with emulated hands
+npx @iwsdk/cli dev up --ai-mode agent && npm run test:xr   # 38 XR checks with emulated hands
 ```
 
 | Suite | What it proves |
@@ -75,6 +75,7 @@ npx @iwsdk/cli dev up --ai-mode agent && npm run test:xr   # 19 XR checks with e
 | `scripts/sim-dice.ts` | 300 hand throws: all settle (median 1.1 s), **forced faces are honoured 150/150** (loaded dice), and about 97% land fully in the throwing court. |
 | `scripts/e2e/xr_core.py` | Hands-only in IWER (`immersive-ar`, Quest 3 profile): table detection → pinch to place → pinch to skip the intro → pinch-pickup → throw → reveal → seen swap is caught → poking the gong catches Shakuni's scripted cheat → play resumes. |
 | `scripts/e2e/xr_cheats.py` | Unseen swap gets away; wrong accusation forfeits your throw; flip-poke registers; reaching the centre wins; striking the gong restarts. |
+| `scripts/e2e/xr_hands.py` | Hand-tracking guardrails: a lost hand doesn't throw the dice, a passing fingertip doesn't move a piece, take-back works, waving gets a reply. Ghost-hand demos, Shakuni's early call, the dice legend, gold changing hands and the closing reflection are checked in the other two. |
 
 `test:xr` calls `python3`. On Windows run `python scripts/e2e/run_all.py`.
 
