@@ -193,6 +193,8 @@ export class CalligraphySystem extends createSystem({
   private deskEntity!: Entity;
   private ghost!: GhostHand;
   private poses!: Record<Handedness, GhostPoseBuilder>;
+  /** The master's hand at the piano: relaxed, curved fingers, not the writing point. */
+  private pianoPoses!: Record<Handedness, GhostPoseBuilder>;
   private blender = new JointBlender();
   private ghostJoints = new Float32Array(JOINT_COUNT * 16);
   private userJoints = new Float32Array(JOINT_COUNT * 16);
@@ -270,10 +272,22 @@ export class CalligraphySystem extends createSystem({
    */
   private writeWith: 'finger' | 'pen' = 'finger';
   private penOffset?: Vector3;
+  /** A fingertip has found the real table this session (pen calibration needs it first). */
+  private surfaceTouched = false;
+  private recenterPos = new Vector3();
+  /** The reference space whose 'reset' (holding the Meta button) we listen to. */
+  private resetRef?: XRReferenceSpace;
+  private recenterPending = false;
+  /** Whether IWSDK's own hand meshes are drawn over your tracked hands (undefined: not yet set). */
+  private handMeshesOn?: boolean;
+  private sayAudio?: HTMLAudioElement;
   private penHand?: XRHandedness;
   private penM = new Matrix4();
   private penCand = new Matrix4();
-  private penCandidate?: { m: Matrix4; height: number; hand?: XRHandedness };
+  private penCandidate?: { m: Matrix4; height: number; hand?: XRHandedness; finger: Vector3 };
+  /** World position of the pen hand's index fingertip (to tell a fingertip touch from a pen tip). */
+  private penFinger = new Vector3();
+  private penFingerCand = new Vector3();
   private midiInput?: HTMLInputElement;
   private genOverlay?: HTMLDivElement;
   private generating = false;
@@ -452,6 +466,13 @@ export class CalligraphySystem extends createSystem({
     if (import.meta.env.DEV) {
       // Dev only: tools feed a test photo to the own-background converter.
       (window as unknown as { __hoamAddPano?: (f: File) => Promise<void> }).__hoamAddPano = (f) => this.addPano(f);
+      (window as unknown as { __hoamHands?: () => unknown }).__hoamHands = () => {
+        const h = this.input.xr.visualAdapters.hand;
+        const st = (a: typeof h.left) => ({ connected: a.connected, model: (a.visual as { model?: { visible: boolean } } | undefined)?.model?.visible });
+        return { on: this.handMeshesOn, left: st(h.left), right: st(h.right) };
+      };
+      (window as unknown as { __hoamFireReset?: () => void }).__hoamFireReset = () =>
+        this.renderer.xr.getReferenceSpace()?.dispatchEvent(new Event('reset'));
       (window as unknown as { __hoamPaint?: (t: string) => void }).__hoamPaint = (t) => {
         this.describePano();
         (this.genOverlay!.querySelector('#hoam-gen-text') as HTMLTextAreaElement).value = t;
@@ -470,6 +491,7 @@ export class CalligraphySystem extends createSystem({
     }
     this.progress = loadProgress();
     this.writeWith = this.progress.writeWith ?? 'finger';
+    this.restorePen();
     this.immersive = this.progress.scene === 'place' || this.progress.scene === 'own';
     this.ownScene = this.progress.scene === 'own';
     void loadOwnPano().then((blob) => {
@@ -531,6 +553,7 @@ export class CalligraphySystem extends createSystem({
     this.ghost = new GhostHand();
     this.world.createTransformEntity(this.ghost.root, { persistent: true });
     this.poses = { left: new GhostPoseBuilder('left'), right: new GhostPoseBuilder('right') };
+    this.pianoPoses = { left: new GhostPoseBuilder('left', true), right: new GhostPoseBuilder('right', true) };
     this.ghostTool = new HeldTool(true);
     this.userTool = new HeldTool(false);
     this.world.createTransformEntity(this.ghostTool.root, { persistent: true });
@@ -632,6 +655,8 @@ export class CalligraphySystem extends createSystem({
     on(this.menu, 'btn-unit-next', () => this.pageUnit(1));
     on(this.menu, 'btn-review', () => this.startReview());
     on(this.menu, 'btn-tool', () => this.toggleWriteWith());
+    on(this.menu, 'btn-say', () => this.sayCharacter());
+    on(this.menu, 'btn-recenter', () => this.recenter('menu'));
     on(this.menu, 'lang-english', () => this.setLanguage('english'));
     on(this.welcome, 'share-button', () => void this.copyTuneLink());
     on(this.menu, 'btn-slower', () => this.setTempo(this.tempo - 0.1));
@@ -972,6 +997,7 @@ export class CalligraphySystem extends createSystem({
     if (!b.panel.visible || this.hidden.has(b.id)) return false;
     if (b.id.startsWith('lang-') && this.hidden.has('languages')) return false;
     if (b.id === 'btn-record' && this.hidden.has('piano-row')) return false;
+    if ((b.id === 'btn-tool' || b.id === 'btn-say') && this.hidden.has('tool-row')) return false;
     if (b.id === 'btn-next' || b.id === 'btn-again') {
       if (!this.captionActionsShown) return false;
       if (b.id === 'btn-next' && this.lessonIndex === this.lessonCount() - 1) return false;
@@ -1290,6 +1316,8 @@ export class CalligraphySystem extends createSystem({
     this.text(this.menu, 'streak', days > 0 ? `${days}-day streak  -  ${goal}` : `Daily goal: ${DAILY_GOAL} lessons`);
     this.display('btn-review', this.reviewIndex() >= 0);
     this.display('tool-row', !piano);
+    this.display('btn-say', !piano);
+    this.text(this.menu, 'btn-say-label', `Hear it (${{ chinese: 'Mandarin', japanese: 'Japanese', english: 'English' }[this.language]})`);
     this.text(this.menu, 'btn-tool-label', this.writeWith === 'pen' ? 'Write with: a real pen (beta)' : 'Write with: fingertip');
   }
 
@@ -1362,6 +1390,7 @@ export class CalligraphySystem extends createSystem({
     this.sfx.stopMusic();
     this.applyScene();
     this.calibrated = false;
+    this.surfaceTouched = false;
     this.desk.root.visible = true;
     this.arrival = 1;
     this.desk.body.scale.set(1, 1, 1);
@@ -1487,6 +1516,7 @@ export class CalligraphySystem extends createSystem({
       // Skip the seal: use this desk's last calibration (or none).
       this.surfaceOffset = this.progress.calibratedOffset ?? 0;
       this.calibrated = true;
+      this.surfaceTouched = true;
     }
     this.mode = 'watch'; // placement is over (setCraft ignores requests while placing)
     if (p.craft === 'piano' && this.craft !== 'piano') this.setCraft('piano');
@@ -1541,6 +1571,7 @@ export class CalligraphySystem extends createSystem({
     if (watchFirst) {
       this.mode = 'watch';
       this.startWatchChoreo(1);
+      this.sayCharacter();
       this.setCaption(
         this.lessonEyebrow(),
         'Watch the master',
@@ -1565,6 +1596,22 @@ export class CalligraphySystem extends createSystem({
       this.calibLow = undefined;
       this.calibAsked = false;
       this.ghostTarget(this.calX + 0.03, HOVER_Y + 0.02, this.calZ + 0.02);
+      if (this.writeWith === 'pen' && this.craft === 'calligraphy' && this.penOffset) {
+        this.setCaption(
+          'STEP 2 OF 3  -  YOUR PEN',
+          'Rest your pen on the seal',
+          'Your pen is remembered. Rest its tip on the red seal for a moment: this finds your real table. Then write.',
+        );
+        return;
+      }
+      if (this.writeWith === 'pen' && this.craft === 'calligraphy' && !this.surfaceTouched) {
+        this.setCaption(
+          'STEP 2 OF 3  -  TOUCH, THEN YOUR PEN',
+          'First, touch the seal with a fingertip',
+          'Put the pen down for a moment and rest a fingertip on the red seal: this finds your real table. Then you will pick up your pen.',
+        );
+        return;
+      }
       if (this.writeWith === 'pen' && this.craft === 'calligraphy') {
         this.setCaption(
           'STEP 2 OF 3  -  YOUR PEN',
@@ -1975,7 +2022,7 @@ export class CalligraphySystem extends createSystem({
 
   private poseGhost(): void {
     this.desk.paper.updateWorldMatrix(true, false);
-    this.poses[this.ghost.handedness].compose(
+    (this.craft === 'piano' ? this.pianoPoses : this.poses)[this.ghost.handedness].compose(
       this.desk.paper.matrixWorld,
       this.ghostTip.x,
       this.ghostTip.y,
@@ -1991,7 +2038,7 @@ export class CalligraphySystem extends createSystem({
       const f = (i: number) => `[${j[i * 16 + 12].toFixed(3)}, ${j[i * 16 + 13].toFixed(3)}, ${j[i * 16 + 14].toFixed(3)}]`;
       this.log(`ghost ${this.ghost.handedness} wrist ${f(0)} index-tip ${f(9)} thumb-tip ${f(4)} middle-prox ${f(11)}`);
       const info = this.renderer.info.render;
-      this.log(`render calls ${info.calls} triangles ${info.triangles} mode ${this.mode}`);
+      this.log(`render calls ${info.calls} triangles ${info.triangles} mode ${this.mode} tip ${this.tipValid ? `${this.tip.x.toFixed(3)},${this.tipHeight().toFixed(3)},${this.tip.z.toFixed(3)}` : "none"} lift ${this.needLift} phase ${this.phase}`);
     }
     if (this.lockBlend > 0.001 && this.readUserJoints()) {
       this.blender.blend(this.ghostJoints, this.userJoints, this.lockBlend, this.shownJoints);
@@ -2044,7 +2091,10 @@ export class CalligraphySystem extends createSystem({
     for (const source of session.inputSources) {
       if (!source.hand) continue;
       if (this.penDown && this.tipSource && source !== this.tipSource) continue;
-      const pen = this.writeWith === 'pen';
+      // A real pen reads the index knuckle (and, once calibrated, the pen tip
+      // from it); until a fingertip has found the table, the fingertip itself.
+      const pen =
+        this.writeWith === 'pen' && this.craft === 'calligraphy' && (this.penOffset !== undefined || this.surfaceTouched);
       if (pen && this.penOffset && source.handedness !== this.penHand) continue; // only the calibrated hand
       const space = source.hand.get(pen ? 'index-finger-phalanx-proximal' : 'index-finger-tip');
       const pose = space ? frame.getJointPose(space, ref) : undefined;
@@ -2057,6 +2107,14 @@ export class CalligraphySystem extends createSystem({
         else this.v.setFromMatrixPosition(this.penCand);
         this.v.applyMatrix4(this.paperInv);
         if (this.penOffset) this.v.y += TIP_CONTACT_Y; // read the tip like a fingertip pad
+        if (!this.penOffset) {
+          const ft = source.hand.get('index-finger-tip');
+          const fp = ft ? frame.getJointPose(ft, ref) : undefined;
+          if (fp) {
+            this.penFingerCand.set(fp.transform.position.x, fp.transform.position.y, fp.transform.position.z);
+            if (!this.playerIsIdentity) this.penFingerCand.applyMatrix4(this.player.matrixWorld);
+          }
+        }
       } else {
         const p = pose.transform.position;
         this.v.set(p.x, p.y, p.z);
@@ -2075,7 +2133,10 @@ export class CalligraphySystem extends createSystem({
         bestH = h;
         bestSource = source;
         this.v2.copy(this.v);
-        if (pen) this.penM.copy(this.penCand);
+        if (pen) {
+          this.penM.copy(this.penCand);
+          this.penFinger.copy(this.penFingerCand);
+        }
       }
     }
     if (!bestSource) {
@@ -2117,7 +2178,8 @@ export class CalligraphySystem extends createSystem({
     const c = this.desk.cursor;
     const active = this.mode === 'practice' || this.mode === 'calibrate';
     const h = this.tipHeight();
-    if (!active || !this.tipValid || this.penDown || !this.tipOnPaper() || h > 0.09 || h < -0.06) {
+    const knuckleOnly = this.writeWith === 'pen' && this.surfaceTouched && !this.penOffset; // not the pen tip yet
+    if (!active || knuckleOnly || !this.tipValid || this.penDown || !this.tipOnPaper() || h > 0.09 || h < -0.06) {
       c.visible = false;
       return;
     }
@@ -2147,7 +2209,7 @@ export class CalligraphySystem extends createSystem({
     (ring.material as { opacity: number }).opacity = pulse;
     ring.scale.setScalar(1 + 0.15 * pulse);
     if (!this.tipValid) return;
-    if (this.writeWith === 'pen' && !this.penOffset) {
+    if (this.writeWith === 'pen' && this.craft === 'calligraphy' && !this.penOffset && this.surfaceTouched) {
       this.calibratePen(dt);
       return;
     }
@@ -2199,6 +2261,20 @@ export class CalligraphySystem extends createSystem({
       this.surfaceOffset = offset;
     }
     this.progress.calibratedOffset = this.surfaceOffset;
+    this.surfaceTouched = true;
+    if (this.writeWith === 'pen' && this.craft === 'calligraphy' && !this.penOffset) {
+      // The table is found; now learn where the pen's tip is.
+      this.tipFilter.reset();
+      this.penCandidate = undefined;
+      this.sfx.stamp();
+      this.log(`calibrated offset ${this.surfaceOffset.toFixed(4)}, now the pen`);
+      this.setCaption(
+        'STEP 2 OF 3  -  YOUR PEN',
+        'Now rest your pen on the seal',
+        'Pick up a real pen, brush or chopstick and hold it the way you write. Rest its tip on the red seal, keep still while the ring grows, then lift.',
+      );
+      return;
+    }
     this.calibrated = true;
     this.desk.sealRing.scale.setScalar(1);
     (this.desk.sealRing.material as { opacity: number }).opacity = 0.25;
@@ -2218,7 +2294,7 @@ export class CalligraphySystem extends createSystem({
    */
   private calibratePen(dt: number): void {
     const ring = this.desk.sealRing;
-    const near = Math.hypot(this.tip.x - this.calX, this.tip.z - this.calZ) < 0.12;
+    const near = Math.hypot(this.tip.x - this.calX, this.tip.z - this.calZ) < 0.18;
     const up = this.tip.y;
     const cand = this.penCandidate;
     if (cand && up > cand.height + 0.03) {
@@ -2228,7 +2304,20 @@ export class CalligraphySystem extends createSystem({
       const offset = this.v.clone().applyMatrix4(this.m.copy(cand.m).invert());
       this.penCandidate = undefined;
       this.calibHold = 0;
-      if (offset.length() < 0.03 || offset.length() > 0.2) return; // not a pen held in the hand
+      const fingerUp = this.v2.copy(cand.finger).applyMatrix4(this.paperInv).y - this.surfaceOffset;
+      if (fingerUp < 0.016 && this.v.distanceTo(cand.finger) < 0.03) {
+        // The index fingertip itself was on the seal: that would make the
+        // "pen tip" your finger. Ask for the pen.
+        this.log('pen calibration rejected: that was a fingertip');
+        this.setCaption('STEP 2 OF 3  -  YOUR PEN', 'That was your fingertip', 'Pick up a real pen, brush or chopstick, hold it the way you write, and rest its tip (not your finger) on the red seal. Keep still, then lift.');
+        return;
+      }
+      if (offset.length() < 0.03 || offset.length() > 0.3) {
+        // Not a pen held in the hand (the knuckle itself, or too far away).
+        this.log(`pen calibration rejected: tip ${(offset.length() * 100).toFixed(1)} cm from the knuckle`);
+        this.setCaption('STEP 2 OF 3  -  YOUR PEN', 'Once more, tip on the seal', 'Hold the pen the way you write, rest only its tip on the red seal, keep still while the ring grows, then lift the pen.');
+        return;
+      }
       this.penOffset = offset;
       this.penHand = cand.hand;
       this.surfaceOffset = 0;
@@ -2237,22 +2326,68 @@ export class CalligraphySystem extends createSystem({
       ring.scale.setScalar(1);
       (ring.material as { opacity: number }).opacity = 0.25;
       this.sfx.stamp();
+      this.progress.penOffset = [offset.x, offset.y, offset.z];
+      this.progress.penHand = this.penHand;
+      saveProgress(this.progress);
       this.log(`pen calibrated ${(offset.length() * 100).toFixed(1)} cm from the knuckle, ${this.penHand} hand`);
       this.needLift = false; // already lifted
       this.beginPractice();
       return;
     }
-    if (near && up > 0.015 && up < 0.2 && this.tipSpeed < 0.04) {
+    if (near && up > 0.015 && up < 0.25 && this.tipSpeed < 0.06) {
       this.calibHold += dt;
       ring.scale.setScalar(1 + 0.7 * clamp01(this.calibHold / 0.6));
       if (this.calibHold >= 0.6 && (!cand || up < cand.height - 0.003)) {
-        this.penCandidate = { m: this.penM.clone(), height: up, hand: this.tipSource?.handedness };
+        this.penCandidate = { m: this.penM.clone(), height: up, hand: this.tipSource?.handedness, finger: this.penFinger.clone() };
         this.setCaption('STEP 2 OF 3  -  YOUR PEN', 'Now lift your pen', 'Got it. Lift the pen off the seal and the paper is yours.');
       }
     } else if (!cand) {
       this.calibHold = 0;
       ring.scale.setScalar(1);
     }
+  }
+
+  /**
+   * Recenter (menu button, or holding the Meta button): the set comes to rest
+   * right in front of you, at the height of the table already found.
+   */
+  private recenter(why: string): void {
+    if (this.mode === 'demo2d' || this.mode === 'placing') return;
+    this.readHead();
+    this.desk.root.updateWorldMatrix(true, false);
+    const y = this.desk.root.matrixWorld.elements[13];
+    const p = this.recenterPos.copy(this.head).addScaledVector(this.fwd, 0.38);
+    p.y = y;
+    this.setDeskWorldPose(p, Math.atan2(-this.fwd.x, -this.fwd.z));
+    if (this.penDown) this.cancelStroke();
+    this.tipFilter.reset();
+    this.piano.fitToFloor(y);
+    this.layoutPanels();
+    this.sfx.chime(0, 0.12);
+    this.log(`recentred (${why}) at [${p.x.toFixed(3)}, ${p.y.toFixed(3)}, ${p.z.toFixed(3)}]`);
+  }
+
+  /** The lesson's character, letter or word spoken (clips in Yosun Chang's voice, public/audio/{zh,ja,en}). */
+  private sayCharacter(): void {
+    if (this.craft !== 'calligraphy') return;
+    const dir = { chinese: 'zh', japanese: 'ja', english: 'en' }[this.language];
+    const url = `${import.meta.env.BASE_URL}audio/${dir}/${this.lesson.id}.mp3`;
+    if (!this.sayAudio) this.sayAudio = new Audio();
+    this.sayAudio.src = url;
+    this.sayAudio.volume = 1;
+    void this.sayAudio.play().then(
+      () => this.log(`say ${this.lesson.id}`),
+      (error: unknown) => this.log(`say ${this.lesson.id} failed ${String(error)}`),
+    );
+  }
+
+  /** Use the pen learned earlier, if any. */
+  private restorePen(): boolean {
+    const o = this.progress.penOffset;
+    if (this.writeWith !== 'pen' || !o) return false;
+    this.penOffset = new Vector3(o[0], o[1], o[2]);
+    this.penHand = this.progress.penHand;
+    return true;
   }
 
   /** Fingertip (default) or a real pen or brush held in the hand (beta). */
@@ -2266,6 +2401,13 @@ export class CalligraphySystem extends createSystem({
     this.tipFilter.reset();
     this.refreshMenu();
     this.log(`write with ${this.writeWith}`);
+    // A pen already learned (this or an earlier session): just follow it, no
+    // restart, so writing with real ink can carry on.
+    if (this.writeWith === 'pen' && this.restorePen() && this.surfaceTouched) {
+      this.needLift = true;
+      this.log('pen restored, no restart');
+      return;
+    }
     if (this.craft === 'calligraphy' && (this.mode === 'practice' || this.mode === 'calibrate' || this.mode === 'complete')) {
       this.calibrated = false;
       this.startLesson(this.lessonIndex, false);
@@ -3159,6 +3301,38 @@ export class CalligraphySystem extends createSystem({
   update(delta: number): void {
     const dt = Math.min(delta, 0.05);
     this.clock += dt;
+    // Holding the Meta button recenters the headset's view; the browser tells
+    // us with a 'reset' event on the reference space. Bring the set along.
+    const ref = this.renderer.xr.getReferenceSpace();
+    if (ref && ref !== this.resetRef) {
+      this.resetRef = ref;
+      ref.addEventListener('reset', () => {
+        this.recenterPending = true;
+      });
+    }
+    // In your own room (passthrough) you see your real hands, so a drawn copy
+    // of them only lags behind as a second, "ghost" pair. Draw them only when
+    // a 360 place covers the room.
+    const meshes = this.immersive;
+    if (meshes !== this.handMeshesOn && this.renderer.xr.isPresenting) {
+      this.handMeshesOn = meshes;
+      const hands = this.input.xr.visualAdapters.hand;
+      hands.left.toggleVisual(meshes);
+      hands.right.toggleVisual(meshes);
+      this.log(`hand meshes ${meshes ? 'on' : 'off'}`);
+    }
+    if (this.handMeshesOn === false) {
+      // IWSDK can show the model again when a hand (re)connects: keep it hidden.
+      const hands = this.input.xr.visualAdapters.hand;
+      for (const adapter of [hands.left, hands.right]) {
+        const model = (adapter.visual as { model?: { visible: boolean } } | undefined)?.model;
+        if (model?.visible) model.visible = false;
+      }
+    }
+    if (this.recenterPending && this.renderer.xr.isPresenting) {
+      this.recenterPending = false;
+      this.recenter('headset recenter');
+    }
     this.ghost.tick(this.clock);
     const saved = this.deskMemory.tick(dt, this.desk.root);
     if (saved) this.log(saved);
