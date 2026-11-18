@@ -28,9 +28,11 @@ import { createAtlas } from './atlas.js';
 import { triCount } from './kit.js';
 import { STAND_BACK, dressingMesh, makeSpotItems } from './spots.js';
 import { makePersonRig, type PersonOptions } from './people.js';
-import { Vendor } from './vendor.js';
+import { HumanVendor } from './human.js';
+import { makeCounter, type Counter } from './counter.js';
 import { makeAutoRig, makeBusRig, type AutoModel } from './props.js';
-import { buildSadakCity } from './sadak-city.js';
+import { buildSadakCity, hashId } from './sadak-city.js';
+import { attireFor } from '../sadak-engine/lib/game/attire';
 import { makeContactShadows } from './shadows.js';
 import { SPOTS, toLocal, toWorld, type Pt } from './layout.js';
 import { ROADS } from './osm-data.js';
@@ -38,6 +40,16 @@ import { Leg, MAX_YAW_RATE, RIDE_SPEED, cut, findRoute, keepLeft, smooth, type P
 import { ROAD_DROP, makeCabin, type Cabin } from './cabins.js';
 
 const IDS: SpotId[] = ['kachori', 'flowers', 'auto', 'paranthe', 'bus', 'minaret'];
+
+/** Each stall's counter: width (counter frame) and the colour its planks lean toward. */
+const COUNTER_LOOK: Record<SpotId, { width: number; tint: number; trim: number }> = {
+  kachori: { width: 1.42, tint: 0x2f7f8c, trim: 0x3a2a1e },
+  flowers: { width: 1.42, tint: 0x8a3324, trim: 0x3a2a1e },
+  auto: { width: 1.3, tint: 0x6a4a32, trim: 0x2e2218 },
+  paranthe: { width: 1.42, tint: 0x6a3a7a, trim: 0x3a2a1e },
+  bus: { width: 1.3, tint: 0xc9b48e, trim: 0x8a7a62 },
+  minaret: { width: 1.3, tint: 0x6a3a26, trim: 0x2e2218 },
+};
 
 /** SADAK's errand ids, kinds and roles (lib/game/tasks.ts, the Purani Sadak pack). */
 const SADAK_HOSTS: [SpotId, string, 'shop' | 'temple', string][] = [
@@ -47,8 +59,8 @@ const SADAK_HOSTS: [SpotId, string, 'shop' | 'temple', string][] = [
   ['minaret', 'purani-sadak-minaret', 'temple', 'Masjid Caretaker'],
 ];
 
-/** Auto parking spot beside the user, in the auto spot's counter frame. */
-const AUTO_PARK: Pt = [1.65, 0.15];
+/** Raju's parked auto (SADAK parks it beside its host): ahead and to the right of the user, in view, in the auto spot's counter frame. */
+const AUTO_PARK: Pt = [1.45, -1.3];
 /** Bus centre when stopped: its rear door beside the user. */
 const BUS_PARK: Pt = [2.4, -1.6];
 
@@ -58,22 +70,60 @@ const _v = new Vector3();
 const _s = new Vector3(1, 1, 1);
 
 /** Vendors: looks and standing heights. */
-const VENDORS: Record<SpotId, PersonOptions> = {
+const VENDOR_BASE: Record<SpotId, PersonOptions> = {
   kachori: { preset: 'kurta_pyjama', seed: 7, height: 1.72, skin: 0xa9744f, cloth1: 0xf1e6cc, cloth2: 0xe6e0d0, female: false, headwear: 'short', moustache: true, kit: ['towel'], kitColour: 0xff7a1a, hair: 0x1c1712 },
   flowers: { preset: 'sari', seed: 12, height: 1.65, skin: 0x8d5524, cloth1: 0xe8364f, cloth2: 0xf2b631, female: true, headwear: 'bun', bindi: true, bangles: 0x1b9e5a, hair: 0x14100c },
   // The chai-stall man at the auto stand (Raju is the auto's driver).
-  auto: { preset: 'kurta_pyjama', seed: 23, height: 1.66, skin: 0x6f4a30, cloth1: 0xd8d0b8, cloth2: 0x5a4a3a, female: false, headwear: 'short', moustache: true, kit: ['towel'], kitColour: 0xc0392b, hair: 0x8a8580 },
+  // Raju, SADAK's auto host: he waits beside his parked auto and takes the wheel for the ride.
+  auto: { preset: 'shirt_trousers', seed: 5, height: 1.7, skin: 0x8a5a3a, cloth1: 0x8f8a76, cloth2: 0x35302a, female: false, headwear: 'short', moustache: true, kit: ['towel'], hair: 0x1a1410 },
   paranthe: { preset: 'kurta_pyjama', seed: 33, height: 1.68, skin: 0x8d5524, cloth1: 0xf2ece0, cloth2: 0x3a3a48, female: false, headwear: 'short', moustache: true, kit: ['towel'], kitColour: 0x9a4fd0, hair: 0x1a1410 },
   bus: { preset: 'shirt_trousers', seed: 44, height: 1.71, skin: 0xa9744f, cloth1: 0x7f9fc8, cloth2: 0x2c3340, female: false, headwear: 'short', moustache: true, carry: 'bag', hair: 0x14100c },
   minaret: { preset: 'kurta_pyjama', seed: 55, height: 1.7, skin: 0xa9744f, cloth1: 0xf4f1ea, cloth2: 0xf4f1ea, female: false, headwear: 'topi', headColour: 0xffffff, kit: ['angavastram'], kitColour: 0x19c3b0, hair: 0x2a231c, beard: 0x3a332a },
 };
-/** Raju, who drives the auto (and the auto ride). */
-const RAJU: PersonOptions = { preset: 'shirt_trousers', seed: 5, height: 1.7, skin: 0x8a5a3a, cloth1: 0x8f8a76, cloth2: 0x35302a, female: false, headwear: 'short', moustache: true, kit: ['towel'], hair: 0x1a1410 };
+/** SADAK's errand hosts (lib/game/tasks.ts): role, kind and voice decide what they wear. */
+const HOSTS: Record<SpotId, { task: string; role: string; kind: string; speaker: string }> = {
+  auto: { task: 'purani-sadak-auto', role: 'Auto Driver', kind: 'auto', speaker: 'aditya' },
+  kachori: { task: 'purani-sadak-shop', role: 'Kachori Wallah', kind: 'shop', speaker: 'rohan' },
+  flowers: { task: 'purani-sadak-temple', role: 'Flower Seller', kind: 'temple', speaker: 'ritu' },
+  bus: { task: 'purani-sadak-bus', role: 'Bus Conductor', kind: 'bus', speaker: 'shubh' },
+  paranthe: { task: 'purani-sadak-paranthe', role: 'Paratha Wallah', kind: 'shop', speaker: 'vijay' },
+  minaret: { task: 'purani-sadak-minaret', role: 'Masjid Caretaker', kind: 'temple', speaker: 'shubh' },
+};
+
+/**
+ * Each vendor dressed by SADAK's own attireFor (preset, clothes, headwear,
+ * work kit), on our VR rig (face, height, skin and hair stay the rig's).
+ * Kit our rig lacks maps to the nearest it has: the conductor's ticket bag
+ * to a shoulder bag, a skullcap to a white topi.
+ */
+function vendorLook(id: SpotId): PersonOptions {
+  const h = HOSTS[id];
+  const a = attireFor(h, 'delhi', hashId(h.task));
+  const base = VENDOR_BASE[id];
+  const headwear = a.headwear === 'skullcap' || a.headwear === 'cap' ? 'topi' : a.headwear === 'turban' ? 'topi' : a.headwear;
+  const kit = (a.kit ?? []).filter((k): k is 'apron' | 'towel' | 'angavastram' => k === 'apron' || k === 'towel' || k === 'angavastram');
+  return {
+    ...base,
+    preset: (a.preset ?? base.preset) as PersonOptions['preset'],
+    female: a.female ?? base.female,
+    cloth1: a.cloth1 ?? base.cloth1,
+    cloth2: a.cloth2 ?? base.cloth2,
+    headwear: headwear ?? base.headwear,
+    headColour: a.headColour ?? base.headColour,
+    kit,
+    kitColour: a.kitColour,
+    carry: a.kit?.includes('ticketBag') ? 'bag' : base.carry,
+  };
+}
+const VENDORS = Object.fromEntries(IDS.map((id) => [id, vendorLook(id)])) as Record<SpotId, PersonOptions>;
+
+/** Raju at the wheel (the auto ride): the same man as the auto spot's host. */
+const RAJU: PersonOptions = VENDORS.auto;
 
 const CHORES: Record<SpotId, [Vector3, 'stir' | 'thread' | 'pour']> = {
   kachori: [new Vector3(0.5, 0.1, STAND_BACK - 0.4), 'stir'],
   flowers: [new Vector3(0, 0.05, STAND_BACK - 0.3), 'thread'],
-  auto: [new Vector3(0.38, 0.12, STAND_BACK - 0.29), 'pour'],
+  auto: [new Vector3(0, 0.06, STAND_BACK - 0.3), 'thread'],
   paranthe: [new Vector3(0, 0.06, STAND_BACK - 0.3), 'thread'],
   bus: [new Vector3(0, 0.06, STAND_BACK - 0.3), 'thread'],
   minaret: [new Vector3(0, 0.05, STAND_BACK - 0.3), 'thread'],
@@ -193,9 +243,10 @@ export function buildStreet(renderer: WebGLRenderer | null = null): StreetWorld 
 
   // ---- spots ----
   let tableH = 0.74;
+  const realCounters = {} as Record<SpotId, Counter>;
   const spots = {} as Record<SpotId, Spot>;
   const dressings = {} as Record<SpotId, Mesh>;
-  const vendors = {} as Record<SpotId, Vendor>;
+  const vendors = {} as Record<SpotId, HumanVendor>;
   let active: SpotId = 'kachori';
   const anchorMatrix = () => group.parent?.matrixWorld ?? spots[active].counter.matrixWorld;
   IDS.forEach((id, i) => {
@@ -206,12 +257,15 @@ export function buildStreet(renderer: WebGLRenderer | null = null): StreetWorld 
     counter.rotation.y = s.yaw;
     counter.visible = false;
     group.add(counter);
+    // The counter on the user's real table: real wood, tinted toward the stall's colour (counter.ts).
+    const real = makeCounter(COUNTER_LOOK[id], tableH);
+    counter.add(real.group);
+    realCounters[id] = real;
     const dressing = dressingMesh(id, atlas, tableH, worldMat);
     counter.add(dressing);
     dressings[id] = dressing;
-    const rig = makePersonRig(VENDORS[id], peopleMat);
-    const [chore, kind] = CHORES[id];
-    const v = new Vendor({ rig, counter, anchorMatrix, chore, choreKind: kind, seed: 3 + i * 5, standBack: STAND_BACK });
+    // A real character (tools/humans/build_character.py) with mocap and procedural layers (human.ts).
+    const v = new HumanVendor({ id, counter, anchorMatrix, seed: 3 + i * 5, standBack: STAND_BACK });
     v.root.position.set(0, -tableH, -STAND_BACK);
     v.counterY = tableH;
     if (id !== 'bus') counter.add(v.root);
@@ -296,6 +350,14 @@ export function buildStreet(renderer: WebGLRenderer | null = null): StreetWorld 
         for (const w of wheels) model.bones[w].rotation.x += spin;
         place(s, side, pitch);
       },
+      park() {
+        state = 'parked';
+        t = 0;
+        s = track.sPark;
+        lastS = s;
+        root.visible = true;
+        place(s, 0, 0);
+      },
       reset() {
         state = 'away';
         root.visible = false;
@@ -314,6 +376,8 @@ export function buildStreet(renderer: WebGLRenderer | null = null): StreetWorld 
   driver.mesh.name = 'auto-driver';
   driver.mesh.position.set(0, 0.99 - driver.dims.hipY * driver.dims.scale, 0.3);
   autoModel.mesh.add(driver.mesh);
+  // engine.ts seatDriver(...).visible = false: the seat stays empty while Raju waits beside it.
+  driver.mesh.visible = false;
   {
     const b = driver.bones;
     b.hipL.rotation.x = -1.45;
@@ -563,6 +627,7 @@ export function buildStreet(renderer: WebGLRenderer | null = null): StreetWorld 
     bus,
     setTableHeight(h: number) {
       tableH = MathUtils.clamp(h, 0.4, 1.2);
+      for (const id of IDS) realCounters[id].setHeight(tableH);
       for (const id of IDS) {
         const old = dressings[id];
         const next = dressingMesh(id, atlas, tableH, worldMat);

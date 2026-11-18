@@ -1,0 +1,48 @@
+{
+ "female": false,
+ "age": 0.45,
+ "muscle": 0.55,
+ "weight": 0.55,
+ "height": 1.72,
+ "seed": 11,
+ "skin": "middleage_asian_male",
+ "hair": "short02",
+ "eyebrows": "eyebrow001",
+ "clothes": [
+  {
+   "asset": "elvs_crude_t-shirt_male",
+   "colour": 15260864,
+   "extend_to": "knee",
+   "flare": 0.22
+  },
+  {
+   "asset": "toigo_harem_pants",
+   "colour": 4866616
+  },
+  {
+   "asset": "toigo_mj_cloth_shoes"
+  }
+ ],
+ "extras": {
+  "apron": 15921126
+ },
+ "skinTint": 12159592,
+ "hairTint": 2762274,
+ "anim": {
+  "sources": [
+   "/home/shiwani/a/code/hackathons/meta-vr/assets-cache/anim/Universal Animation Library[Standard]/Unreal-Godot/UAL1_Standard.glb",
+   "/home/shiwani/a/code/hackathons/meta-vr/assets-cache/anim/Universal Animation Library 2[Standard]/Unreal-Godot/UAL2_Standard.glb"
+  ],
+  "clips": {
+   "Idle": "Idle_Loop",
+   "Talking": "Idle_Talking_Loop",
+   "Yes": "Yes",
+   "No": "Idle_No_Loop",
+   "FoldArms": "Idle_FoldArms_Loop",
+   "Interact": "Interact",
+   "Driving": "Driving_Loop",
+   "Rail": "Idle_Rail_Loop"
+  },
+  "step": 2
+ }
+}

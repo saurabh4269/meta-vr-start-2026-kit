@@ -1,0 +1,20 @@
+{
+ "female": false,
+ "age": 0.5,
+ "muscle": 0.55,
+ "weight": 0.45,
+ "height": 1.7,
+ "preset": "shirt_trousers",
+ "kit": [
+  "towel"
+ ],
+ "moustache": false,
+ "colours": {
+  "skin": 9067066,
+  "cloth1": 9147550,
+  "cloth2": 5989227,
+  "hair": 1709072,
+  "kit": 15921126
+ },
+ "seed": 37
+}

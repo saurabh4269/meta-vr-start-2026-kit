@@ -239,3 +239,33 @@ export class Mic {
     });
   }
 }
+
+
+/** Loudness and brightness of the voice playing now, for lip sync (world/human.ts voiceMeter). */
+let analyser: AnalyserNode | null = null;
+let freq: Uint8Array<ArrayBuffer> | null = null;
+export function meterVoice(out: { level: number; bright: number }): void {
+  const ctx = sfx.context;
+  if (!ctx || !sfx.voiceBus) {
+    out.level = 0;
+    return;
+  }
+  if (!analyser) {
+    analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.35;
+    sfx.voiceBus.connect(analyser);
+    freq = new Uint8Array(new ArrayBuffer(analyser.frequencyBinCount));
+  }
+  analyser.getByteFrequencyData(freq!);
+  let sum = 0;
+  let hi = 0;
+  const n = freq!.length;
+  for (let i = 2; i < n; i++) {
+    sum += freq![i];
+    if (i > n * 0.18) hi += freq![i];
+  }
+  const level = sum / ((n - 2) * 255);
+  out.level += (Math.min(1, level * 3.2) - out.level) * 0.5;
+  out.bright = sum > 0 ? Math.min(1, (hi / sum) * 2.2) : 0;
+}

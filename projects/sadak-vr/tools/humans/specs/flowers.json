@@ -1,0 +1,18 @@
+{
+ "female": true,
+ "age": 0.5,
+ "muscle": 0.45,
+ "weight": 0.55,
+ "height": 1.65,
+ "preset": "sari",
+ "kit": [],
+ "bun": true,
+ "longHair": true,
+ "colours": {
+  "skin": 9262372,
+  "cloth1": 13934615,
+  "cloth2": 10107410,
+  "hair": 1314828
+ },
+ "seed": 23
+}

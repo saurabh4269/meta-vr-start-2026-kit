@@ -50,9 +50,10 @@ import type { ComfortLevel } from './levels.js';
 import { Panels } from './panels.js';
 import { learn, loadSave, markDay, recordVisit, writeSave, type Save } from './save.js';
 import { scoreAttempt } from './score.js';
-import { Mic, Speech } from './speech.js';
+import { Mic, Speech, meterVoice } from './speech.js';
 import { loadFonts } from './text.js';
 import { buildStreet } from '../world/street.js';
+import { voiceMeter } from '../world/human.js';
 import type { AutoRig, Spot, SpotId, StreetWorld, VendorRig } from '../world/types.js';
 
 /**
@@ -582,6 +583,7 @@ export class SadakSystem extends createSystem({
     this.faceViewer(this.toast.mesh);
     this.faceViewer(this.totalChip.mesh);
     this.panels.face(this.tA.copy(this.headLocal).applyMatrix4(this.anchor.matrixWorld));
+    meterVoice(voiceMeter);
     this.street.update(dt, time);
     this.spot.vendor.setLookAt(this.headLocal);
     this.keys.clear();
@@ -849,10 +851,11 @@ export class SadakSystem extends createSystem({
   /** Before the dialogue: raise a hand for the auto, or wait for the bus to pull in. */
   private updateArrive(dt: number): void {
     const how = this.errand.arrive;
-    if (how === 'hail' && !this.street.auto.parked && !this.phaseOnce.has('hailed')) {
+    if (how === 'hail' && !this.phaseOnce.has('hailed')) {
       if (this.once('hint')) {
-        this.setGoal('Raise a hand high to stop an auto');
-        sfx.horn(0.6, 0.6);
+        // SADAK: Raju's auto stands parked at its spot, Raju beside it.
+        if (!this.street.auto.parked) this.street.auto.park();
+        this.setGoal("Raise a hand high to hail Raju's auto");
       }
       let up = false;
       for (let i = 0; i < 2; i++) if (this.hands.both[i].tracked && this.palmLocal[i].y > this.headLocal.y + 0.02) up = true;
@@ -861,10 +864,9 @@ export class SadakSystem extends createSystem({
         this.log('hailed');
         this.phaseOnce.add('hailed');
         this.setGoal('');
-        this.street.auto.arrive();
-        sfx.putter(2.2, 0.7);
-        setTimeout(() => sfx.horn(0.7, 1), 1800);
-        this.waitUntil = this.phaseT + 2.4;
+        this.street.spots.auto.vendor.gesture('wave');
+        sfx.horn(0.7, 1);
+        this.waitUntil = this.phaseT + 1.2;
       }
       return;
     }

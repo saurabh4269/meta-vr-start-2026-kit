@@ -53,3 +53,4 @@ artifacts/
 # Agent worktrees and Python caches
 .claude/worktrees/
 __pycache__/
+tools/humans/out/

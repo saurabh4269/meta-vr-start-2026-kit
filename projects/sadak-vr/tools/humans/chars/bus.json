@@ -1,0 +1,46 @@
+{
+ "female": false,
+ "age": 0.55,
+ "muscle": 0.5,
+ "weight": 0.62,
+ "height": 1.71,
+ "seed": 41,
+ "skin": "middleage_asian_male",
+ "hair": "short02",
+ "eyebrows": "eyebrow001",
+ "clothes": [
+  {
+   "asset": "namuhekam_male_polo_shirt",
+   "colour": 12098148
+  },
+  {
+   "asset": "toigo_wool_pants",
+   "colour": 9074000
+  },
+  {
+   "asset": "toigo_mj_cloth_shoes"
+  }
+ ],
+ "extras": {
+  "bag": 5978658
+ },
+ "skinTint": 10777168,
+ "hairTint": 2762274,
+ "anim": {
+  "sources": [
+   "/home/shiwani/a/code/hackathons/meta-vr/assets-cache/anim/Universal Animation Library[Standard]/Unreal-Godot/UAL1_Standard.glb",
+   "/home/shiwani/a/code/hackathons/meta-vr/assets-cache/anim/Universal Animation Library 2[Standard]/Unreal-Godot/UAL2_Standard.glb"
+  ],
+  "clips": {
+   "Idle": "Idle_Loop",
+   "Talking": "Idle_Talking_Loop",
+   "Yes": "Yes",
+   "No": "Idle_No_Loop",
+   "FoldArms": "Idle_FoldArms_Loop",
+   "Interact": "Interact",
+   "Driving": "Driving_Loop",
+   "Rail": "Idle_Rail_Loop"
+  },
+  "step": 2
+ }
+}

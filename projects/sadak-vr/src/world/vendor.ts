@@ -343,11 +343,17 @@ export class Vendor implements VendorRig {
       lid = p >= 1 ? 1 : 0.08 + 0.92 * Math.abs(1 - 2 * p);
       if (p >= 1) this.blinkT = -1;
     }
-    b.eyeL.scale.y = lid;
-    b.eyeR.scale.y = lid;
     const syl = Math.max(0, Math.sin(time * 13.0) * 0.6 + Math.sin(time * 7.3 + 0.5) * 0.5 + 0.15);
     const open = tw * Math.min(1, syl);
-    b.jaw.scale.set(1 - open * 0.15, 1 + open * 2.6, 1);
+    if (this.o.rig.kind === 'human') {
+      // Real face: the upper lids come down over the eyes, the jaw hinges open.
+      for (const l of [b.lidL, b.lidR]) if (l) l.position.y = (l.userData.y as number) - (1 - lid) * 0.0085;
+      b.jaw.rotation.x = open * 0.22;
+    } else {
+      b.eyeL.scale.y = lid;
+      b.eyeR.scale.y = lid;
+      b.jaw.scale.set(1 - open * 0.15, 1 + open * 2.6, 1);
+    }
     const brow = tw * Math.max(0, Math.sin(time * 2.7)) * 0.006 + wWave * 0.005 + wReceive * 0.004;
     b.browL.position.y = (b.browL.userData.y ??= b.browL.position.y) + brow;
     b.browR.position.y = (b.browR.userData.y ??= b.browR.position.y) + brow;

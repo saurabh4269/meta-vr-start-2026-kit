@@ -24,6 +24,14 @@ export const STAND_BACK = 0.66;
 export const FACADE = 1.35;
 export const SPOT_COLOUR: Record<SpotId, number> = { kachori: 0xff7a1a, flowers: 0xe8364f, auto: 0xf5c518, paranthe: 0xb05cff, bus: 0x2f8fff, minaret: 0x19c3b0 };
 
+/**
+ * Our own stall enclosures (shop bays, awnings and poles, bulbs, boards, the
+ * chai tarp, the bus shelter) are off: in SADAK the host stands in the open
+ * street (its own stalls, shelters and signs are in the city), so only the
+ * counter at the user's real table and its goods stay.
+ */
+const ENCLOSED = false;
+
 const WOOD = 0x7a5230;
 const WOOD_DK = 0x4a3424;
 const BAMBOO = 0xb08a52;
@@ -258,7 +266,10 @@ function shopBay(P: Parts, atlas: Atlas, C: number, sign: string, kind: 'kachori
 }
 
 /** Wooden counter body: top at y=0, user edge at z=+0.2, back at z=-0.48. */
+/** The counter itself is now counter.ts (real wood); this only keeps the old call sites. */
+const REAL_COUNTER = true;
 function counterBody(P: Parts, C: number, w: number, top: number, body: number) {
+  if (REAL_COUNTER) return;
   const g = -C;
   box(P, w, 0.045, 0.7, 0, -0.025, -0.14, top);
   box(P, w + 0.03, 0.03, 0.73, 0, -0.06, -0.14, shade(body, 0.8));
@@ -287,7 +298,9 @@ function shade(hex: number, k: number): number {
 export function dressKachori(P: Parts, atlas: Atlas, C: number): void {
   const rand = mulberry32(41);
   const g = -C;
+  if (ENCLOSED) {
   shopBay(P, atlas, C, 'kachori', 'kachori', rand);
+  }
   counterBody(P, C, 1.42, 0xd8dde0, 0x2f7f8c);
   // Kadhai on its iron ring stove, oil shimmering, kachoris frying.
   const kx = 0.5;
@@ -326,10 +339,12 @@ export function dressKachori(P: Parts, atlas: Atlas, C: number): void {
     P.cyl(0.031, 0.031, 0.005, x, 0.09, -0.06 + (x - 0.6) * 1.5, col, 10);
   }
   // Awning, poles, bulb, a small tray of fresh dough balls at the back.
+  if (ENCLOSED) {
   canopy(P, 2.9, -FACADE, g + 2.86, 0.38, g + 2.12, 0xff7a1a, 0xfff1d6);
   for (const s of [-1, 1]) P.cyl(0.035, 0.04, 2.12, s * 1.38, g + 1.06, 0.36, BAMBOO, 6);
   bulb(P, 0.3, g + 2.45, -0.5, 0.28);
   bulb(P, -0.75, g + 2.4, -0.2, 0.22);
+  }
   for (let i = 0; i < 6; i++) P.sphere(0.03, 0.62 + (i % 3) * 0.06 - 0.06, 0.02, -0.42 + Math.floor(i / 3) * 0.06, 0xf0e2c0, 1, 0.75, 1, 8, 5);
   // On the street, by the counter: a gas cylinder and a crate.
   P.cyl(0.15, 0.15, 0.58, 0.95, g + 0.29, -0.55, 0xc8302a, 10);
@@ -341,11 +356,11 @@ export function dressKachori(P: Parts, atlas: Atlas, C: number): void {
 export function dressFlowers(P: Parts, atlas: Atlas, C: number): void {
   const rand = mulberry32(73);
   const g = -C;
+  if (ENCLOSED) {
   shopBay(P, atlas, C, 'flowers', 'flowers', rand);
+  }
   counterBody(P, C, 1.42, 0xb08458, 0x8a3324);
   // A banana leaf lining the counter top.
-  P.add(new BoxGeometry(1.25, 0.004, 0.5).translate(0, 0.004, -0.24), 0x3f8f3a);
-  P.add(new BoxGeometry(0.02, 0.006, 0.5).translate(0, 0.006, -0.24), 0x6fae4a);
   heapBasket(P, -0.45, -0.28, 0.2, 0x9a6b3a, [MARIGOLD_O, MARIGOLD_Y, 0xff9f2e], rand, 18);
   heapBasket(P, 0.5, -0.28, 0.16, 0x9a6b3a, [0xc8102e, 0xe02a4a, 0xa00c22], rand, 12);
   // Coiled garlands stacked at the left front, lotus on the right.
@@ -363,6 +378,7 @@ export function dressFlowers(P: Parts, atlas: Atlas, C: number): void {
   // A brass lota and a tray of incense.
   P.add(lathe([[0.001, 0], [0.04, 0], [0.055, 0.04], [0.04, 0.08], [0.025, 0.095], [0.032, 0.11], [0.001, 0.11]], 14).translate(0.62, 0, -0.06), BRASS);
   // Awning with strands of marigold hanging at its edge, clear of the vendor's face.
+  if (ENCLOSED) {
   canopy(P, 2.9, -FACADE, g + 2.86, 0.38, g + 2.12, 0xe8364f, 0xfff1d6);
   for (const s of [-1, 1]) P.cyl(0.035, 0.04, 2.12, s * 1.38, g + 1.06, 0.36, BAMBOO, 6);
   for (let i = 0; i < 4; i++) {
@@ -376,6 +392,7 @@ export function dressFlowers(P: Parts, atlas: Atlas, C: number): void {
     P.add(new IcosahedronGeometry(0.022, 0).rotateY(i).translate(x, y, 0.37), i % 2 ? MARIGOLD_O : MARIGOLD_Y);
   }
   bulb(P, 0.35, g + 2.45, -0.55, 0.28);
+  }
   // A bucket of water with lotus stems by the counter.
   P.cyl(0.17, 0.14, 0.34, 0.98, g + 0.17, -0.6, 0x2f6fb3, 10);
   P.cyl(0.16, 0.16, 0.01, 0.98, g + 0.33, -0.6, 0x5a8fb8, 10);
@@ -432,6 +449,8 @@ export function dressChai(P: Parts, atlas: Atlas, C: number): void {
   const rand = mulberry32(97);
   const g = -C;
   counterBody(P, C, 1.3, 0x9c7a52, 0x6a4a32);
+  // Raju's errand is the auto and the fare: no chai stall on his counter (it was ours, not SADAK's).
+  if (ENCLOSED) {
   // Stove and a pateela of chai on the boil, a steel kettle, glasses, rusk jars.
   const sx = -0.38;
   const sz = -0.29;
@@ -457,6 +476,7 @@ export function dressChai(P: Parts, atlas: Atlas, C: number): void {
     P.cyl(0.074, 0.074, 0.03, x, 0.215, z, lid, 10);
   }
   // Blue tarp on bamboo poles (clear of the side where the auto pulls up).
+  if (ENCLOSED) {
   const tz0 = -1.1;
   const tz1 = 0.5;
   for (const [px, pz] of [[-0.82, tz0], [0.82, tz0], [-0.82, tz1], [0.82, tz1]] as const) P.cyl(0.03, 0.035, 2.2, px, g + 1.1, pz, BAMBOO, 6);
@@ -471,10 +491,12 @@ export function dressChai(P: Parts, atlas: Atlas, C: number): void {
     P.cyl(0.17, 0.15, 0.04, x, g + 0.44, z, 0x2f9e44, 10);
     for (let k = 0; k < 4; k++) P.cyl(0.015, 0.015, 0.42, x + Math.cos(k * 1.57) * 0.11, g + 0.21, z + Math.sin(k * 1.57) * 0.11, 0x2f9e44, 4);
   }
+  }
   box(P, 0.45, 0.3, 0.35, -0.9, g + 0.15, -0.65, 0xd13b30);
   P.sphere(0.2, 0.95, g + 0.62, -0.65, 0xa8583a, 1, 0.95, 1, 10, 7);
   P.cyl(0.07, 0.08, 0.06, 0.95, g + 0.82, -0.65, 0xa8583a, 8);
   P.cyl(0.16, 0.2, 0.42, 0.95, g + 0.21, -0.65, WOOD_DK, 6);
+  }
   void rand;
 }
 
@@ -483,7 +505,9 @@ export function dressChai(P: Parts, atlas: Atlas, C: number): void {
 export function dressParanthe(P: Parts, atlas: Atlas, C: number): void {
   const rand = mulberry32(131);
   const g = -C;
+  if (ENCLOSED) {
   shopBay(P, atlas, C, 'paranthe', 'paranthe', rand);
+  }
   counterBody(P, C, 1.42, 0xc9ced3, 0x6a3a7a);
   // Tava: a broad iron griddle on a ring burner, two paranthas frying in ghee.
   const tx = -0.46;
@@ -517,10 +541,12 @@ export function dressParanthe(P: Parts, atlas: Atlas, C: number): void {
   box(P, 0.45, 0.3, 0.36, -0.98, g + 0.15, -0.6, 0x8a5a3a);
   for (let i = 0; i < 7; i++) P.sphere(0.045, -1.12 + (i % 4) * 0.09, g + 0.32, -0.66 + Math.floor(i / 4) * 0.1, 0xb98a4a, 1, 0.8, 1, 6, 4);
   // Purple awning (Mohan's colour), bamboo poles, two bulbs.
+  if (ENCLOSED) {
   canopy(P, 2.9, -FACADE, g + 2.86, 0.38, g + 2.12, 0x8a3fb8, 0xfff1d6);
   for (const sx of [-1, 1]) P.cyl(0.035, 0.04, 2.12, sx * 1.38, g + 1.06, 0.36, BAMBOO, 6);
   bulb(P, 0.3, g + 2.45, -0.5, 0.28);
   bulb(P, -0.7, g + 2.4, -0.2, 0.22);
+  }
 }
 
 /** A parantha: a round golden flatbread with browned blisters. */
@@ -563,7 +589,6 @@ export function dressMasjidDesk(P: Parts, atlas: Atlas, C: number): void {
   const g = -C;
   counterBody(P, C, 1.3, 0x8a5a3a, 0x6a3a26);
   // A green cloth over the top, a ledger open with a pen, a roll of tickets, a brass bell.
-  box(P, 1.22, 0.004, 0.6, 0, 0.003, -0.15, 0x1f6f5c);
   box(P, 0.36, 0.02, 0.26, -0.36, 0.015, -0.34, 0xf4efe0);
   box(P, 0.012, 0.024, 0.26, -0.36, 0.017, -0.34, 0x8a3324);
   P.add(new CylinderGeometry(0.005, 0.005, 0.13, 5).rotateZ(Math.PI / 2).rotateY(0.5).translate(-0.3, 0.032, -0.3), 0x1a1a6a);
@@ -571,9 +596,11 @@ export function dressMasjidDesk(P: Parts, atlas: Atlas, C: number): void {
   P.add(new BoxGeometry(0.05, 0.002, 0.14).translate(0.52, 0.004, -0.33), 0xf2e6c4);
   P.add(lathe([[0.001, 0], [0.04, 0], [0.045, 0.02], [0.03, 0.06], [0.012, 0.075], [0.006, 0.09], [0.001, 0.09]], 12).translate(0.62, 0, -0.42), BRASS);
   // The ticket board on a stand.
+  if (ENCLOSED) {
   P.cyl(0.02, 0.02, 1.6, -0.75, g + 0.8, -0.45, WOOD_DK, 5);
   box(P, 0.62, 0.3, 0.04, -0.75, g + 1.75, -0.45, 0x2a1e16);
   P.tex(new PlaneGeometry(0.58, 0.26).translate(-0.75, g + 1.75, -0.425), atlas.rect('sign:ticket'));
+  }
   // Shoe rack: shoes off before the stair.
   const rx = 1.15;
   for (const y of [0.0, 0.3, 0.6]) box(P, 0.5, 0.025, 1.0, rx, g + 0.08 + y, -0.4, WOOD);
@@ -602,6 +629,7 @@ export function dressBusLedge(P: Parts, atlas: Atlas, C: number): void {
   box(P, 0.26, 0.004, 0.02, -0.4, 0.014, -0.34, 0x5a5650);
   P.cyl(0.032, 0.032, 0.2, -0.55, 0.1, -0.08, 0xcfe6f0, 10);
   P.cyl(0.02, 0.02, 0.03, -0.55, 0.215, -0.08, 0x2f6fb3, 8);
+  if (ENCLOSED) {
   const z0 = -1.5;
   const z1 = -6.2;
   const xb = -1.45;
@@ -623,6 +651,7 @@ export function dressBusLedge(P: Parts, atlas: Atlas, C: number): void {
   P.cyl(0.035, 0.035, 2.6, 0.78, g + 1.3, 2.9, 0x8a9096, 6);
   box(P, 0.5, 0.36, 0.04, 0.78, g + 2.5, 2.9, 0x1d7a46);
   P.tex(new PlaneGeometry(0.46, 0.3).translate(0.78, g + 2.5, 2.925), atlas.rect('sign:busstop'));
+  }
   // A dustbin and a crate of water bottles on the footpath.
   P.cyl(0.18, 0.15, 0.6, -1.15, g + 0.3, 0.9, 0x2f6fb3, 10);
   box(P, 0.4, 0.28, 0.3, -1.05, g + 0.14, -0.8, 0x3a78c2);

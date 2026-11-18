@@ -29,10 +29,14 @@ import { createMaterialLibrary } from '../sadak-engine/lib/game/materials';
 import { createVehicleMaterials } from '../sadak-engine/lib/game/vehicles';
 import { createTransitMaterial } from '../sadak-engine/lib/game/transit';
 import { makeMissionShopStall } from '../sadak-engine/lib/game/assets/index';
+import { makeBarberShop } from '../sadak-engine/lib/game/assets/barber';
+import { BARBER_FACING, barberSignFor } from '../sadak-engine/lib/game/barber';
 import { taskSpot } from '../sadak-engine/lib/game/world/mapData';
+import { DETAIL } from '../sadak-engine/lib/game/world/buildings';
 import mapJson from '../../public/maps/purani-sadak.json';
 import { GRADE_GLSL, REVEAL_GLSL, U } from './cel.js';
 import { CityCull } from './city-cull.js';
+import { addInkHulls, createInkMaterial } from './ink.js';
 
 export const DISTRICT_ID = 'purani-sadak';
 
@@ -151,6 +155,10 @@ export function buildSadakCity(renderer: WebGLRenderer | null): SadakCity {
   bounce.position.set(-30, -20, 60);
   group.add(bounce);
 
+  // SADAK's own knob for how far round the player buildings are fully detailed
+  // (105 m on the desktop; its city-cover stills raise it). VR halves it:
+  // beyond, SADAK's own massing blocks stand in, as they do past 105 m.
+  DETAIL.near = 55;
   const celifier = createCelifier({ shadowTint: new Color(presetFor(district.id).celShadowTint) });
   const mats = renderer ? createMaterialLibrary(renderer) : undefined;
   const world = buildWorld(map, district, {
@@ -161,6 +169,21 @@ export function buildSadakCity(renderer: WebGLRenderer | null): SadakCity {
     toon: (m) => revealPatch(celifier.convert(m)),
   });
   group.add(world.group);
+
+  // engine.ts buildBarberSite: the vibes-only barber shop in the gap the map
+  // compiler left for it near the spawn (SADAK's barber errand itself is not in this port).
+  {
+    const { x, z, yaw } = map.barber;
+    const anchor = new Group();
+    anchor.name = 'sadak-barber';
+    anchor.position.set(x, world.height.at(x, z), z);
+    anchor.rotation.y = yaw;
+    const shop = makeBarberShop(barberSignFor(district.language));
+    shop.rotation.y = BARBER_FACING;
+    anchor.add(shop);
+    world.group.add(anchor);
+    world.collide.box(x, z, 2.15, 1.75, yaw);
+  }
   celifier.apply(world.group);
   patchTree(world.group);
   patchTree(sky.skyline);
@@ -168,6 +191,16 @@ export function buildSadakCity(renderer: WebGLRenderer | null): SadakCity {
   // engine.ts primes the world round the spawn; the director re-primes round the first spot.
   world.prime(new Vector3(spawn.x, 0, spawn.z));
 
+  // SADAK's ink lines on buildings, monuments and set pieces (ink.ts).
+  const ink = createInkMaterial();
+  const inked = () => {
+    for (const name of ['buildings', 'landmarks']) {
+      const g = world.group.getObjectByName(name);
+      if (g) addInkHulls(g, ink);
+    }
+    for (const c of group.children) if (c.name.startsWith('sadak-stall-')) addInkHulls(c, ink);
+  };
+  inked();
   // VR draw distance (see city-cull.ts). Landmarks, roads and ground are always drawn.
   const cull = new CityCull(
     world.group,
@@ -175,13 +208,14 @@ export function buildSadakCity(renderer: WebGLRenderer | null): SadakCity {
       { name: 'landmarks', radius: Infinity },
       { name: 'roads', radius: Infinity },
       { name: 'areas', radius: Infinity },
-      { name: 'buildings', radius: 170 },
-      { name: 'crowd', radius: 45 },
-      { name: 'traffic', radius: 70 },
+      { name: 'buildings', radius: 130 },
+      { name: 'crowd', radius: 40 },
+      { name: 'traffic', radius: 60 },
     ],
     60,
     new Set(['buildings', 'street', 'markets', 'clutter']),
   );
+  cull.beforeScan = inked;
   const focus = new Vector3();
   return {
     map,

@@ -1,0 +1,20 @@
+{
+ "female": false,
+ "age": 0.6,
+ "muscle": 0.45,
+ "weight": 0.65,
+ "height": 1.68,
+ "preset": "kurta_pyjama",
+ "kit": [
+  "apron"
+ ],
+ "moustache": false,
+ "colours": {
+  "skin": 9262372,
+  "cloth1": 15260864,
+  "cloth2": 4866616,
+  "hair": 1709072,
+  "kit": 15921126
+ },
+ "seed": 53
+}

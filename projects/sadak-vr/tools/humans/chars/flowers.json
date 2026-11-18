@@ -1,0 +1,52 @@
+{
+ "female": true,
+ "age": 0.5,
+ "muscle": 0.45,
+ "weight": 0.55,
+ "height": 1.62,
+ "seed": 23,
+ "skin": "cutoff3d_indian_female_skin",
+ "hair": "rehmanpolanski_hair_bun_brown",
+ "eyebrows": "eyebrow006",
+ "race": {
+  "asian": 0.4,
+  "caucasian": 0.35,
+  "african": 0.25
+ },
+ "clothes": [
+  {
+   "asset": "joepal_crude_t-shirt_female",
+   "colour": 9054746
+  },
+  {
+   "asset": "toigo_long_full_skirt",
+   "colour": 13934615
+  },
+  {
+   "asset": "toigo_flats",
+   "colour": 6961690
+  }
+ ],
+ "extras": {
+  "pallu": 13934615
+ },
+ "hairTint": 1709588,
+ "skinTint": 11565656,
+ "anim": {
+  "sources": [
+   "/home/shiwani/a/code/hackathons/meta-vr/assets-cache/anim/Universal Animation Library[Standard]/Unreal-Godot/UAL1_Standard.glb",
+   "/home/shiwani/a/code/hackathons/meta-vr/assets-cache/anim/Universal Animation Library 2[Standard]/Unreal-Godot/UAL2_Standard.glb"
+  ],
+  "clips": {
+   "Idle": "Idle_Loop",
+   "Talking": "Idle_Talking_Loop",
+   "Yes": "Yes",
+   "No": "Idle_No_Loop",
+   "FoldArms": "Idle_FoldArms_Loop",
+   "Interact": "Interact",
+   "Driving": "Driving_Loop",
+   "Rail": "Idle_Rail_Loop"
+  },
+  "step": 2
+ }
+}

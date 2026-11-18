@@ -50,6 +50,8 @@ export interface AutoRig {
   arrive(): void;
   /** Drive away (≈2 s). */
   leave(): void;
+  /** Stand parked beside the user at once (SADAK parks Raju's auto at its spot, driver's seat empty). */
+  park(): void;
   readonly parked: boolean;
   update(dt: number, time: number): void;
 }

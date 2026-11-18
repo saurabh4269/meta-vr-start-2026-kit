@@ -47,6 +47,9 @@ export class CityCull {
   private lastX = Infinity;
   private lastZ = Infinity;
 
+  /** Ink hulls (ink.ts) only draw this close: SADAK's ink fades out with distance too. */
+  inkRadius = 30;
+
   constructor(
     private readonly world: Object3D,
     private readonly rules: CullRule[],
@@ -60,16 +63,22 @@ export class CityCull {
     return this.rules.find((r) => r.name === top)?.radius ?? this.fallback;
   }
 
+  /** Called before each scan (e.g. to add ink hulls to new meshes). */
+  beforeScan: (() => void) | null = null;
+
   /** Find meshes not seen before (SADAK streams building detail in later). */
   private scan(): void {
+    this.beforeScan?.();
     for (const top of this.world.children) {
       const radius = this.radiusFor(top.name);
-      if (!Number.isFinite(radius)) continue;
-      const isStatic = this.staticNames.has(top.name);
+      // Never-culled groups (landmarks) still have their ink hulls culled.
+      const always = !Number.isFinite(radius);
+      const isStatic = always || this.staticNames.has(top.name);
       top.traverse((o) => {
         if (this.seen.has(o)) return;
         const m = o as Mesh;
         if (!m.isMesh || o.userData.cullProxy) return;
+        if (always && !o.userData.inkHull) return;
         this.seen.add(o);
         if ((o as InstancedMesh).isInstancedMesh) {
           const src = o as InstancedMesh;
@@ -87,7 +96,8 @@ export class CityCull {
           this.proxies.push({ src, dst, radius, srcVersion: -1 });
         } else {
           if (!m.geometry.boundingSphere) m.geometry.computeBoundingSphere();
-          this.plains.push({ mesh: m, radius, static: isStatic, centre: new Vector3(), r: -1 });
+          const r = o.userData.inkHull ? Math.min(radius, this.inkRadius) : radius;
+          this.plains.push({ mesh: m, radius: r, static: isStatic, centre: new Vector3(), r: -1 });
         }
       });
     }

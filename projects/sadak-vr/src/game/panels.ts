@@ -28,7 +28,7 @@ interface Placed {
 
 /** UIKit sizes are centimetres: scale = metres wide / (panel units / 100). */
 const LAYOUT: Record<PanelName, { id: string; parent: 'anchor' | 'ui'; pos: [number, number, number]; scale: number; face: boolean }> = {
-  hud: { id: 'hud-panel', parent: 'anchor', pos: [-0.5, 0.36, -0.08], scale: 0.075, face: true },
+  hud: { id: 'hud-panel', parent: 'anchor', pos: [-0.66, 0.3, -0.24], scale: 0.06, face: true },
   actions: { id: 'actions-panel', parent: 'ui', pos: [0, 0.17, -0.47], scale: 0.065, face: true },
   intro: { id: 'intro-panel', parent: 'ui', pos: [0, 0.46, -0.8], scale: 0.09, face: true },
   ride: { id: 'ride-panel', parent: 'ui', pos: [0, 0.3, -0.62], scale: 0.07, face: true },

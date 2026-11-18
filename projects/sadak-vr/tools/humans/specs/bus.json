@@ -1,0 +1,18 @@
+{
+ "female": false,
+ "age": 0.55,
+ "muscle": 0.5,
+ "weight": 0.6,
+ "height": 1.71,
+ "preset": "shirt_trousers",
+ "kit": [],
+ "bag": true,
+ "moustache": false,
+ "colours": {
+  "skin": 11105359,
+  "cloth1": 12098148,
+  "cloth2": 9074000,
+  "hair": 1314828
+ },
+ "seed": 41
+}

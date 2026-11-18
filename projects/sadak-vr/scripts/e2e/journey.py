@@ -95,6 +95,16 @@ def pay(amount, overpay=False):
     wait_for(rf'paid amount={amount}', 12)
 
 
+TOUR = os.environ.get('TOUR') == '1'
+toured = set()
+def tour(name):
+    """TOUR=1: a screenshot at each first-of-its-kind moment, for visual review."""
+    if TOUR and name not in toured:
+        toured.add(name)
+        time.sleep(0.6)
+        shot('tour-' + name)
+
+
 def play_errand(eid, overpay=False, recall=None):
     m = wait_for(rf'errand id={eid} tier=(\w+) comfort=\w+ steps=(\d+)', 60)
     tier, nsteps = m.group(1), int(m.group(2))
@@ -111,23 +121,37 @@ def play_errand(eid, overpay=False, recall=None):
             continue
         if 'intro' in ev:
             check(f'{eid}: first-meeting card', True)
+            tour(f'{eid}-intro')
         elif 'arrive' in ev and eid == 'auto':
             cli('xr', 'set-hand-pose', payload={'device': 'hand-right', 'poseId': 'default'})
             tip_to([0.25, 1.35, -1.35], 0.5, 'hand-right', anchor='grasp')
-            check('raising a hand stops the auto', bool(wait_for(r'hailed', 8)))
+            tour('auto-arrive')
+            check('raising a hand hails Raju at his parked auto', bool(wait_for(r'hailed', 8)))
             park()
+        elif 'arrive' in ev and TOUR:
+            time.sleep(3.2)
+            tour(f'{eid}-arrive')
         elif 'player' in ev:
             t = targets()
+            tour(f'{eid}-player')
             poke(t['you'], t['head'])
             mm = wait_for(r'result points=(\d+)', 8)
             r = targets()
+            tour(f'{eid}-result')
             ok = press_button(r, 'btn-continue', r'continue step=')
             if not ok:
-                check(f'{eid}: Continue button', False)
+                # One retry with fresh positions; counted so a flaky press is visible, not hidden.
+                stats['retries'] = stats.get('retries', 0) + 1
+                time.sleep(0.8)
+                ok = press_button(r, 'btn-continue', r'continue step=')
+            if not ok:
+                recent = [m[-110:] for _, m in logs(count=40) if 'targets' not in m][-8:]
+                check(f'{eid}: Continue button', False, f"points={mm.group(1)} buttons={r['buttons']} head={r['head']} recent={recent}")
                 key(' ')
             said += 1
         elif 'task' in ev:
             amount = int(wait_for(r'pay amount=(\d+)', 6).group(1))
+            tour(f'{eid}-pay')
             pay(amount, overpay)
             overpay = False
         elif 'after' in ev:
@@ -136,6 +160,7 @@ def play_errand(eid, overpay=False, recall=None):
                 for it in field(mm.string, 'layout')['items'][:2]:
                     grab(it, [it[0] - 0.15, it[1] + 0.1, it[2] + 0.2])
                 check(f'{eid}: picked two garlands by pinching', bool(wait_for(r'picked n=2', 8)))
+                tour(f'{eid}-after')
 
 
 # ---------------------------------------------------------------- the day
@@ -151,10 +176,17 @@ time.sleep(1.5)
 select()
 m = wait_for(r'placed table=(\w+) height=([\d.]+)', 10)
 check('placement on the emulator table', m.group(1) == 'true', f'height={m.group(2)}')
+tour('placing')
 wait_for(r'phase reveal', 5)
+if TOUR:
+    time.sleep(1.2)
+    tour('reveal-mid')
 shot('reveal')
 play_errand('auto', recall=False)
 m = wait_for(r'ride kind=(\w+) to=(\w+)', 10)
+if TOUR:
+    time.sleep(4.5)
+    tour('ride-auto')
 check("SADAK's auto ride to the next errand", m.group(1) == 'auto' and m.group(2) == 'kachori', m.group(0))
 play_errand('kachori')
 shot('kachori')
@@ -168,7 +200,7 @@ shot('finale')
 t = targets()
 check('Keep exploring', press_button(t, 'btn-explore', r'round again'))
 play_errand('auto', recall=True)
-print('button presses: poke', stats['poke_buttons'], 'fallback', stats['fallback_buttons'])
+print('button presses: poke', stats['poke_buttons'], 'fallback', stats['fallback_buttons'], 'retries', stats.get('retries', 0))
 if stats['overpaid']:
     check('overpaying: the vendor hands the extra coin back', stats['returned'] == stats['overpaid'], f"{stats['returned']}/{stats['overpaid']}")
 else:

@@ -20,6 +20,7 @@
 
 import { BoxGeometry, CatmullRomCurve3, CylinderGeometry, LatheGeometry, SphereGeometry, TorusGeometry, Vector2, Vector3, BufferGeometry, Float32BufferAttribute, type Bone, type Material, type SkinnedMesh } from '@iwsdk/core';
 import { INK_FADE, RigBuilder, mulberry32, paint, pick } from './kit.js';
+import { makeHumanRig } from './humans.js';
 
 export type PersonPreset = 'sari' | 'salwar_kameez' | 'lungi' | 'kurta_pyjama' | 'shirt_trousers';
 export type Headwear = 'short' | 'bald' | 'bun' | 'braid' | 'topi' | 'dupatta';
@@ -48,6 +49,8 @@ export type PersonOptions = {
   lod?: 0 | 1;
   /** Ink fade distance (0 = no outline). Default: INK_FADE.person / crowd. */
   ink?: number;
+  /** A built human body (humans.ts key, e.g. 'vendor-kachori'); falls back to this procedural rig if it isn't loaded. */
+  model?: string;
   /** Something carried: a cloth bundle on the head or a shoulder bag. */
   carry?: 'none' | 'bundle' | 'bag';
 };
@@ -79,6 +82,8 @@ export type PersonRig = {
   dims: PersonDims;
   tris: number;
   female: boolean;
+  /** 'human': a MakeHuman body from humans.ts (real jaw and eyelid bones). */
+  kind?: 'human' | 'procedural';
 };
 
 /* ------------------------------------------------------------------ */
@@ -180,6 +185,10 @@ function curvedSheet(pts: Vector3[], width: (t: number) => number, segments: num
 /* ------------------------------------------------------------------ */
 
 export function makePersonRig(o: PersonOptions, material: Material): PersonRig {
+  if (o.model) {
+    const human = makeHumanRig(o.model, !!o.female);
+    if (human) return human;
+  }
   const seed = o.seed ?? 1;
   const rand = mulberry32(seed);
   const preset: PersonPreset = o.preset ?? 'shirt_trousers';

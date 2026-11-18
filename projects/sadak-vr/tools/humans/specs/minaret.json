@@ -1,0 +1,20 @@
+{
+ "female": false,
+ "age": 0.6,
+ "muscle": 0.5,
+ "weight": 0.5,
+ "height": 1.7,
+ "preset": "kurta_pyjama",
+ "kit": [],
+ "headwear": "skullcap",
+ "headColour": 16053488,
+ "beard": 3814186,
+ "moustache": true,
+ "colours": {
+  "skin": 11105359,
+  "cloth1": 16053488,
+  "cloth2": 16053488,
+  "hair": 2761500
+ },
+ "seed": 67
+}

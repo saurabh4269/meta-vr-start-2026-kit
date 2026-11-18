@@ -1,5 +1,11 @@
 # Street world: integration notes for the director
 
+> **Update (17 Nov):** the city is no longer our rebuild. `buildStreet(renderer)` now runs SADAK's own engine, vendored unmodified in `src/sadak-engine/` (see `src/world/sadak-city.ts`). The per-spot neighbourhoods (`layout.ts` buildHood, `buildings.ts`, `mosque.ts`, `life.ts`, `sky.ts`) are gone.
+>
+> The kachori, flowers, paranthe and minaret counters now stand where SADAK's `engine.ts` stands each host: the map's task spot, or `innerNear` (inside the temple or mosque) for a temple errand. The user faces the host from SADAK's spot yaw, or the nearest clear side. The auto and bus keep the kerbside spots below.
+>
+> Vendors wear SADAK's `attireFor` clothes. The auto spot's host is now Raju, and `AutoRig.park()` stands his auto beside the user with the seat empty. The tables below are otherwise historical.
+
 `src/world/street.ts` exports `buildStreet(): StreetWorld` and implements
 `src/world/types.ts`. The street is SADAK's Old Delhi (Purani Sadak) rebuilt
 on the real street network: every spot stands where SADAK puts its errand on

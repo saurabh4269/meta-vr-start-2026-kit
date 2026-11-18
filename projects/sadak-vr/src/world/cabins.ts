@@ -22,6 +22,8 @@
 import { BoxGeometry, CylinderGeometry, Group, IcosahedronGeometry, Mesh, SphereGeometry, TorusGeometry, type Material } from '@iwsdk/core';
 import { INK_FADE, Parts, mulberry32 } from './kit.js';
 import { makePersonRig, type PersonOptions, type PersonRig } from './people.js';
+import { HumanVendor } from './human.js';
+import { Matrix4, Object3D, Vector3 } from '@iwsdk/core';
 import { AUTO_GREEN, AUTO_YELLOW, BUS_GREEN } from './props.js';
 import type { RideKind } from './types.js';
 
@@ -62,6 +64,11 @@ export function makeCabin(kind: RideKind, mat: Material, peopleMat: Material, C0
   let shell: Mesh | null = null;
   let C = C0;
   const people: { rig: PersonRig; role: 'driver' | 'puller' | 'conductor' | 'sitter'; seed: number }[] = [];
+  /** The same characters as at the stalls (human.ts): Raju at the wheel, Suresh at the door. */
+  const humans: HumanVendor[] = [];
+  const lookAhead = new Object3D();
+  lookAhead.position.set(0, 0, -7);
+  lookAhead.rotation.y = Math.PI;
   const rigRoot = new Group();
   group.add(rigRoot);
   const wheels: Group[] = [];
@@ -88,14 +95,15 @@ export function makeCabin(kind: RideKind, mat: Material, peopleMat: Material, C0
 
   // ---- the people ----
   if (kind === 'auto') {
-    const r = makePersonRig({ ...spec, lod: 0 }, peopleMat);
-    r.mesh.name = 'cabin-driver';
-    // Seated on the driver's saddle 1 m ahead, hips 0.62 above the floor.
-    r.mesh.position.set(0, 0.62 - r.dims.hipY * r.dims.scale, -1.05);
-    seatedPose(r, 1.05);
-    r.mesh.rotation.y = Math.PI;
-    rigRoot.add(r.mesh);
-    people.push({ rig: r, role: 'driver', seed: 1 });
+    // Raju on the driver's saddle 1 m ahead, facing the road, hands on the handlebar.
+    const h = new HumanVendor({ id: 'auto', counter: lookAhead, anchorMatrix: () => new Matrix4(), seed: 5, standBack: 0,
+      seated: { hands: [new Vector3(0.24, 1.0, 0.42), new Vector3(-0.24, 1.0, 0.42)], hipY: 0.62 }, baseClip: 'drive' });
+    h.root.name = 'cabin-driver';
+    h.root.position.set(0, 0, -1.05);
+    h.root.rotation.y = Math.PI;
+    rigRoot.add(h.root, lookAhead);
+    humans.push(h);
+    void spec;
   } else if (kind === 'rickshaw') {
     const r = makePersonRig({ preset: 'kurta_pyjama', seed: 911, lod: 0, height: 1.64, cloth1: 0xe8dcc0, cloth2: 0x8a7a5a, headwear: 'short', kit: ['towel'], kitColour: 0xf2efe6, moustache: true, skin: 0x6f4a30 }, peopleMat);
     r.mesh.name = 'cabin-puller';
@@ -122,18 +130,13 @@ export function makeCabin(kind: RideKind, mat: Material, peopleMat: Material, C0
       wheels.push(g);
     }
   } else {
-    const r = makePersonRig({ ...spec, lod: 0 }, peopleMat);
-    r.mesh.name = 'cabin-conductor';
-    r.mesh.position.set(1.0, 0, -1.0);
-    rigRoot.add(r.mesh);
-    const b = r.bones;
-    for (const k of ['neck', 'head']) b[k].rotation.order = 'YXZ';
-    // Right hand up on the rail, the left on his ticket bag.
-    b.shoulderR.rotation.set(-2.6, 0, -0.25);
-    b.elbowR.rotation.x = -0.35;
-    b.shoulderL.rotation.set(-0.35, 0, 0.12);
-    b.elbowL.rotation.x = -1.0;
-    people.push({ rig: r, role: 'conductor', seed: 3 });
+    // Suresh standing at the door, one hand up on the rail.
+    const h = new HumanVendor({ id: 'bus', counter: rigRoot, anchorMatrix: () => new Matrix4(), seed: 44, standBack: 0, baseClip: 'rail' });
+    h.root.name = 'cabin-conductor';
+    h.root.position.set(1.0, 0, -1.0);
+    h.root.rotation.y = -Math.PI / 2;
+    rigRoot.add(h.root);
+    humans.push(h);
     // Two passengers a few rows ahead.
     for (const [x, z, seed, preset] of [[0.05, -2.2, 41, 'sari'], [1.4, -3.0, 47, 'kurta_pyjama']] as const) {
       const p = makePersonRig({ preset, seed, lod: 1, height: 1.6 }, peopleMat);
@@ -159,6 +162,10 @@ export function makeCabin(kind: RideKind, mat: Material, peopleMat: Material, C0
       const shake = kind === 'auto' ? Math.sin(time * 71) * 0.0012 + Math.sin(time * 23) * 0.0008 : kind === 'bus' ? Math.sin(time * 41) * 0.0008 : Math.abs(Math.sin(travelled * 2.1)) * 0.004 * Math.min(1, speed);
       group.position.y = shake;
       for (const w of wheels) w.rotation.x -= (speed * dt) / 0.46;
+      for (const h of humans) {
+        h.counterY = 0.9;
+        h.update(dt, time);
+      }
       for (const p of people) {
         const b = p.rig.bones;
         const breath = Math.sin(time * 1.6 + p.seed);
@@ -208,9 +215,19 @@ function bar(P: Parts, x0: number, y0: number, z0: number, x1: number, y1: numbe
 }
 
 /** The surface over the real table: a ledge at the table top, its user edge at z = +0.2. */
-function ledge(P: Parts, C: number, top: number, body: number, w = 1.34) {
-  box(P, w, 0.04, 0.7, 0, -0.02, -0.14, top);
-  box(P, w, C - 0.06, 0.05, 0, -C + (C - 0.06) / 2, -0.47, body);
+function ledge(P: Parts, C: number, top: number, body: number, w = 1.34, depth = 0.7) {
+  const zc = 0.2 - depth / 2;
+  box(P, w, 0.04, depth, 0, -0.02, zc, top);
+  box(P, w, C - 0.06, 0.05, 0, -C + (C - 0.06) / 2, 0.2 - depth + 0.03, body);
+}
+
+/** The driver's seat back under the user's hands: a padded vinyl roll, not a slab across the view. */
+function seatBack(P: Parts, C: number) {
+  const w = 1.0;
+  box(P, w, 0.05, 0.3, 0, -0.025, 0.05, 0x4a3224);
+  box(P, w - 0.04, 0.012, 0.26, 0, 0.002, 0.05, 0x5c3e2c);
+  for (const x of [-0.25, 0, 0.25]) box(P, 0.012, 0.014, 0.26, x, 0.004, 0.05, 0x3a261a);
+  box(P, w, C - 0.06, 0.06, 0, -C + (C - 0.06) / 2, -0.1, 0x3a2a20);
 }
 
 function autoCabin(P: Parts, C: number) {
@@ -227,7 +244,7 @@ function autoCabin(P: Parts, C: number) {
   box(P, 1.3, 0.12, 0.48, 0, f + 0.44, 0.72, SEAT);
   box(P, 1.3, 0.62, 0.1, 0, f + 0.78, 1.02, SEAT);
   // The driver's seat back over the table, its top the table top.
-  ledge(P, C, 0x2a2622, 0x3a3430);
+  seatBack(P, C);
   // Canopy: roof, rear curtain, side quarters, frame.
   box(P, 1.5, 0.08, 2.75, 0, f + 1.98, -0.3, AUTO_YELLOW);
   box(P, 1.48, 0.86, 0.04, 0, f + 1.52, 1.12, AUTO_YELLOW);

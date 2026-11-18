@@ -17,13 +17,14 @@ Meta VR Start Developer Competition 2026 · **Adapted / Significantly Updated** 
   - The "Done: …" toast.
   - The finale: "PURANI SADAK SURVIVED", "₹1,320 earned in Chandni Chowk", "Keep exploring".
 - **Audio:** SADAK's procedural Delhi qawwali (raga Kafi, keherwa, 116 bpm), ducked to silence in dialogue; its SFX on the same events; its street ambience (autos' pip-pip, bus bray, crowd, temple bells, the azaan at prayer times).
-- **Look:** SADAK's cel-shaded street with ink outlines, built from its OpenStreetMap data, with the red sandstone Jama Masjid.
+- **City:** built by SADAK's own code (its `buildWorld`, unmodified) from its OpenStreetMap district map. That gives every building and plot, the roads, the Jama Masjid, Sis Ganj Sahib, the Central Baptist Church, Sunehri Masjid and the Gauri Shankar temple, markets, street furniture, traffic, the crowd, animals, pigeons and the barber shop, under its sky, lights and cel shading.
+- **Hosts:** real human bodies (MakeHuman, CC0) with five-finger hands, a jaw that moves when they talk and eyelids that blink, wearing SADAK's `attireFor` clothes. SADAK's own people are built from primitives, which looks broken at 0.7 m. Each host stands where SADAK's engine puts them. The flower seller is in the Gauri Shankar temple and the caretaker is in the Jama Masjid courtyard. The two shop errands have SADAK's stall beside them. Raju waits beside his parked auto. Every vendor wears what SADAK's `attireFor` gives them.
 
 ## New in VR (the "significant update")
 1. **Mixed reality:** your real table becomes the stall counter. Old Delhi grows out of it from passthrough, inside a glowing marigold sphere.
 2. **Hands-first:** touching your line says it for you, so every step completes without speaking (SADAK needs a microphone).
 3. **Errands you do with your hands:**
-   - raise a hand to stop the auto;
+   - raise a hand to hail Raju at his parked auto;
    - pinch rupee coins onto the vendor's plate (overpay and he hands one back);
    - pinch garlands off the counter;
    - pick up a hot kachori and take a bite.
@@ -38,7 +39,7 @@ Meta VR Start Developer Competition 2026 · **Adapted / Significantly Updated** 
 |---|---|
 | 0–15 s | Passthrough. A marigold outline finds your table: "Pinch to open your stall here." |
 | 15–25 s | **Awe moment:** Chandni Chowk grows out of your table until the room is gone. "सड़क · Chandni Chowk". The qawwali starts. |
-| 25–40 s | "Raise a hand high to stop an auto." Raju's green-and-yellow auto pulls up beside you. "AUTO - AUTO DRIVER: Stop the auto". |
+| 25–40 s | Raju's green-and-yellow auto is parked beside you, with Raju at your table. "Raise a hand high to hail Raju's auto": he waves. "AUTO - AUTO DRIVER: Stop the auto". |
 | 40 s–2 min | "कहाँ जाना है?" You touch (or say) "Nayi Dilli railway station", +pts, Continue… The fare is agreed and Raju drives you through the street to Vikram's kachori stall. |
 
 ## Criteria (25% each)
@@ -52,7 +53,7 @@ Meta VR Start Developer Competition 2026 · **Adapted / Significantly Updated** 
 - **Technical:**
   - IWSDK 1.1.0 with ECS components and the stock interaction components: RayInteractable and PokeInteractable for your line, the mic and the UIKit panels; OneHandGrabbable for the coins.
   - UIKit panels for the HUD and buttons; Canvas2D for Devanagari.
-  - A per-fragment reveal shader, inverted-hull ink outlines, and rides that move the street along the real road graph.
+  - SADAK's engine runs inside IWSDK, unchanged. VR-only layers on top of it: a per-fragment reveal shader added to each of SADAK's materials; its grade and haze moved into the materials (a full-screen pass per eye costs too much on a Quest); inverted-hull ink lines instead of its post-pass ink; and a draw distance (proxies for instanced meshes, layer culling) that brings 3M triangles and 560 draw calls down to 0.13–0.36M and 66–160 per view. SADAK's own building-detail radius is lowered from 105 m to 55 m. Rides move the street along the real road graph.
   - Sarvam bulbul:v3 voices baked into static clips; saaras:v4 scoring through a serverless function.
 - **Polish:** see `docs/TESTING.md` (unit checks, a full emulator journey through all six errands, the headset checklist).
 
@@ -60,5 +61,8 @@ Meta VR Start Developer Competition 2026 · **Adapted / Significantly Updated** 
 - One district (Chandni Chowk, Hindi) of SADAK's ten.
 - Base-language meanings are English only; SADAK offers 11 base languages.
 - Rides compress the real 200–600 m between stalls into about 16 s, with a short reveal cut.
-- Raju and the conductor ride as posed figures.
+- Raju and the conductor ride as posed figures (now real bodies).
+- Our own stall enclosures (awnings, shop bays, boards, the chai tarp, a second bus shelter) are gone. In SADAK the host stands in the open street. Only the counter at your real table and the goods you use remain.
+- Ink lines are inverted hulls (buildings, landmarks and stalls within 30 m), not SADAK's screen-space edge pass. The grade is per material.
+- Rides use our own route player on SADAK's road graph, not SADAK's `rides.ts`. There are no waypoint arrows or minimap; the flow takes you from errand to errand.
 - Voice needs a Sarvam key on the deployment.
