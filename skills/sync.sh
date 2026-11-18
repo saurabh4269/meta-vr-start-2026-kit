@@ -8,7 +8,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WS="$(dirname "$HERE")"
 SKILLS=(quest-hands-first-webxr quest-mr-tutor quest-mr-game)
-PROJECTS=(hands-of-a-master chausar repo-city giants-and-hiders flyby-chair sadak-vr)
+PROJECTS=(hands-of-a-master ink-and-ivory chausar repo-city giants-and-hiders flyby-chair sadak-vr)
 # Genre add-ons a project does not use (its repo stays about that project only).
 declare -A SKIP=([chausar]="quest-mr-tutor")
 

@@ -20,7 +20,7 @@ Read, in this order:
 2. `skills/quest-hands-first-webxr/SKILL.md` (the core playbook), then `references/process.md`, `references/build-path.md` and `references/submission.md`.
 3. The add-on that fits the idea: `skills/quest-mr-tutor/` (teach a skill) or `skills/quest-mr-game/` (an opponent, NPC or physics game).
 4. `research/accessibility-and-pitfalls.md`, `research/past-winners-2025-analysis.md` and `research/winners-code-study.md`.
-5. `projects/hands-of-a-master/` as the most finished example: `README.md`, `docs/JUDGING.md`, `docs/TESTING.md`, `tools/e2e.py` and `src/calligraphy-system.ts` (one system with a state machine). `projects/chausar/` is the game-shaped example.
+5. `projects/ink-and-ivory/` as the most finished example: `README.md`, `docs/JUDGING.md`, `docs/TESTING.md`, `tools/e2e.py` and `src/calligraphy-system.ts` (one system with a state machine). `projects/chausar/` is the game-shaped example.
 
 ## 2. Create the project
 ```bash
@@ -37,7 +37,7 @@ cd projects/<kebab-case-name>
 - **Build the smallest complete journey first** (enter, place on the real table, do the thing, succeed, finish) and test it end to end in the emulator (`npx iwsdk …` CLI, `skills/quest-hands-first-webxr/scripts/xr_e2e_lib.py`). Then polish, and regression-test after every change.
 - **Hands only.** The whole experience must work without controllers, seated, within about 60 cm, with a satisfying session in 10 minutes or less.
 - **Never show work you haven't looked at.** Take screenshots from the player's real viewpoint and in close-up, and inspect them before you report anything.
-- **Plan a visual pass and budget 3–4 hours for it.** In Hands of a Master this did the most for how the app looked (details in `references/visual-quality.md`; `projects/hands-of-a-master/tools/blender/build_assets.py` is the worked example). In order:
+- **Plan a visual pass and budget 3–4 hours for it.** In Hands of a Master this did the most for how the app looked (details in `references/visual-quality.md`; `projects/ink-and-ivory/tools/blender/build_assets.py` is the worked example). In order:
   1. **Baked ambient occlusion and lighting** in Blender (`bake_ao`: a Cycles bake into a second UV map, exported as glTF occlusion) on every hero model: soft contact shadows and depth where parts meet, at no runtime cost.
   2. **Merge static parts by material** before export (`merge_by_material`) to cut draw calls.
   3. **Materials:** clear coat on lacquer or polished surfaces (Principled *Coat Weight* 1, *Coat Roughness* 0.04, exported as `KHR_materials_clearcoat`), sheen on stone and ink, and lighting from each scene's own HDRI (`IBLTexture`).
