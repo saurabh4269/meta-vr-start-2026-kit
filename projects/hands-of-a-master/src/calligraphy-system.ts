@@ -76,7 +76,7 @@ import {
 } from './progress.js';
 
 /**
- * Hands of a Master: the whole experience in one system.
+ * Ink and Ivory: the whole experience in one system.
  *
  * Flow in mixed reality:
  *   placing   find the real desk (detected table plane), else a virtual table
@@ -371,7 +371,7 @@ export class CalligraphySystem extends createSystem({
   private handsLostFor = 0;
   private strokeLostFor = 0;
   private handsHint = false;
-  private captionRecord = ['HANDS OF A MASTER', ' ', ' ', ' '];
+  private captionRecord = ['INK AND IVORY', ' ', ' ', ' '];
   private mgPrev = [0, 0];
 
   /** Dev aid: console lines the IWSDK CLI can read (`iwsdk browser logs`). */
@@ -1909,9 +1909,10 @@ export class CalligraphySystem extends createSystem({
     }
     if (this.craft === 'piano') this.piano.beacon('C4', 0.35 + 0.45 * pulse);
     // Where the fingertip actually rests is the real surface. Usually that is
-    // within a centimetre or two of the detected table; but a room scan can be
+    // within a centimetre of the detected table; but a room scan can be
     // stale (a standing desk raised or lowered since), so the touch can be far
-    // above or below. Near: accept after a short hold, as before. Far: keep
+    // above or below. Near (1.5 cm, the same bound as moving the set): accept
+    // after a short hold. Anything further, including a pause on the way down: keep
     // the lowest still touch and confirm it when the finger lifts (a hand
     // hovering above the target never counts), then move the set onto it.
     const near = Math.hypot(this.tip.x - this.calX, this.tip.z - this.calZ) < 0.035;
@@ -1923,7 +1924,7 @@ export class CalligraphySystem extends createSystem({
     if (near && h > -0.3 && h < 0.3 && this.tipSpeed < 0.05) {
       this.calibHold += dt;
       if (this.calibHold > 0.35 && (this.calibLow === undefined || h < this.calibLow - 0.002)) this.calibLow = h;
-      if (this.calibLow !== undefined && Math.abs(this.calibLow - TIP_CONTACT_Y) < 0.03) {
+      if (this.calibLow !== undefined && Math.abs(this.calibLow - TIP_CONTACT_Y) <= 0.015) {
         this.finishCalibration(this.calibLow);
         return;
       }
