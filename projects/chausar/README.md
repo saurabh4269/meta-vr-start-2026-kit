@@ -38,7 +38,10 @@ A carved chausar board rises out of your real table. Across it sits the spirit o
 - A flicker and a warning tone mean he's turning back.
 - Getting seen means you're caught.
 - Cheating unseen still raises his **suspicion** meter (under his chin). At high suspicion he can call it on luck alone.
-- His second throw always cheats, so every player learns his tell early.
+- His second throw always cheats, so every player learns his tells early. **Two tells:** his hand dips below the table before a loaded throw, and he usually **names the total while the dice are still in the air**. He only knows it because he rigged it.
+- **The first time you catch him**, his dice rise in front of you and the legend is told: the old tellings say they were carved from his father's bones. Touch one.
+
+**The wager is on the table:** eight stacks of gold mohurs beside the board, half each. A capture sweeps a stack to the captor; getting caught costs you one; catching him wins one; the winner takes the rest. The match ends with a closing reflection on how you played.
 
 **Progress (saved in the browser):** each win raises the stake one step, following the Sabha Parva: a chest of gold → the royal chariot → a thousand elephants → the army → the treasury → the kingdom. The ledger shows wins, losses and how often you've caught him.
 
